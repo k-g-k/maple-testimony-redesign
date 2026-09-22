@@ -14,6 +14,7 @@ import type { ReactNode } from "react";
 export function Chapter({
   id,
   question,
+  eyebrow,
   action,
   adornment,
   answer,
@@ -24,6 +25,8 @@ export function Chapter({
   question: string;
   /** Sits opposite the question, for the one thing you can do in the chapter. */
   action?: ReactNode;
+  /** A quiet line above the question, read before the heading. */
+  eyebrow?: ReactNode;
   /** Sits directly beside the question, for a control that qualifies it. */
   adornment?: ReactNode;
   /** The plain-language answer. Large, and the first thing after the question. */
@@ -42,6 +45,7 @@ export function Chapter({
 }) {
   const heading = (
     <>
+      {eyebrow && <div className="mb-[10px]">{eyebrow}</div>}
       <div className="flex items-start justify-between gap-[20px]">
         <div className="flex items-baseline gap-[14px] flex-wrap min-w-0">
           <h2
@@ -67,7 +71,7 @@ export function Chapter({
       // Clears whatever is pinned: the contents bar alone on narrow, the nav
       // and the bar together once the nav becomes sticky at lg.
       className={`scroll-mt-[64px] lg:scroll-mt-[120px] ${
-        band ? "" : "pt-[28px] sm:pt-[40px]"
+        band ? "" : "pt-[16px] sm:pt-[24px]"
       }`}
     >
       {band ? (
@@ -83,12 +87,12 @@ export function Chapter({
               <div className="mt-[28px] sm:mt-[40px]">{band}</div>
             </div>
           </div>
-          {body && <div className="mt-[28px] sm:mt-[40px]">{body}</div>}
+          {body && <div className="mt-[16px] sm:mt-[24px]">{body}</div>}
         </>
       ) : (
         <>
           {heading}
-          {body && <div className="mt-[28px] sm:mt-[40px]">{body}</div>}
+          {body && <div className="mt-[16px] sm:mt-[24px]">{body}</div>}
         </>
       )}
     </section>

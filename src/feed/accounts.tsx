@@ -35,7 +35,12 @@ export function UserAvatar({
         bordered ? "border border-brand-edge" : ""
       }`}
     >
-      <UserTypeIcon type={user.userType} size={Math.round(size * 0.48)} />
+      <span
+        style={{ fontSize: size >= 40 ? 12 : 10 }}
+        className="font-body font-semibold text-brand-ink tracking-[0.02em]"
+      >
+        {user.initials ?? user.name.slice(0, 2).toUpperCase()}
+      </span>
     </div>
   );
 }

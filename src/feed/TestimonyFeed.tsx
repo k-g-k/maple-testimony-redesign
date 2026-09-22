@@ -1058,6 +1058,17 @@ export function TestimonyFeed({
         "--fade-end",
         `${Math.max(0, rect.bottom - feedTop)}px`,
       );
+      // Pinned, the bar is chrome over the list and wants to sit tight to it;
+      // at rest it is a row in the page and wants the page's spacing. CSS has
+      // no selector for "currently stuck", so the state is measured: the bar is
+      // stuck once its top has reached the offset it sticks at.
+      const stuckAt = parseFloat(getComputedStyle(bar).top) || 0;
+      const wasStuck = bar.dataset.stuck === "true";
+      // Two thresholds, not one: it takes 2px of scroll to leave the stuck
+      // state and none to enter it, so the boundary cannot flutter.
+      bar.dataset.stuck = String(
+        wasStuck ? rect.top <= stuckAt + 3 : rect.top <= stuckAt + 1,
+      );
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -1127,7 +1138,7 @@ export function TestimonyFeed({
           style={stickyTop ? { top: stickyTop } : undefined}
           className={
             stickyTop
-              ? "sticky z-[8] bg-ground pt-[16px] pb-[16px]"
+              ? "sticky z-[8] bg-ground pt-[16px] pb-[16px] data-[stuck=true]:pt-[24px] data-[stuck=true]:pb-[8px]"
               : "mb-[16px]"
           }
         >
@@ -1146,45 +1157,46 @@ export function TestimonyFeed({
                 locked={lockTypeFilter}
               />
               <PositionPicker value={filter} onChange={setFilter} />
-              {includeFollowingFilter && hasFollowedInView && (
-                // Pinned right, and the divider goes with it: Following is an
-                // overlay on whatever else is set rather than another way to
-                // narrow by position or account, so it reads better as its
-                // own thing at the end of the row than as the last item in
-                // the same list.
-                <FilterChip
-                  active={followingOnly}
-                  ariaPressed={followingOnly}
-                  onClick={() => setFollowingOnly((f) => !f)}
-                  title={
-                    followingOnly
-                      ? "Clear the Following filter"
-                      : "Only accounts you follow"
-                  }
-                  className="ml-auto inline-flex items-center gap-[5px]"
-                >
-                  Following
-                  {followingOnly && <X className="w-[12px] h-[12px]" />}
-                </FilterChip>
-              )}
-              {/* An action, not a filter: pushed to the far right so the chips
-                  read as one group and this reads as separate from them. Same
-                  height as they are, square corners so it does not look like
-                  one more thing to toggle. */}
-              {!hideAddButton && (
-              <button
-                onClick={() => setComposing(true)}
-                className="ml-auto shrink-0 inline-flex items-center gap-[5px] font-body font-semibold text-xs px-[10px] py-[4px] rounded-control border border-brand text-brand hover:bg-brand-soft cursor-pointer transition-colors"
-              >
-                <Plus className="w-[13px] h-[13px]" />
-                {/* Two labels, one shown at a time: at narrow widths the row
-                    needs the space more than the sentence. */}
-                <span className="max-[1010px]:hidden">
-                  Add Your Perspective
-                </span>
-                <span className="hidden max-[1010px]:inline">Add</span>
-              </button>
-              )}
+              {/* Following and the action are one group pinned to the end of
+                  the row, with their own spacing. Held together rather than
+                  laid out as two more items in the filter row, so a wider
+                  account picker or a selected position moves the filters on the
+                  left without moving this pair or the gap inside it. */}
+              <div className="ml-auto shrink-0 flex items-center gap-[8px]">
+                {includeFollowingFilter && hasFollowedInView && (
+                  // Following is an overlay on whatever else is set rather than
+                  // another way to narrow by position or account, so it reads
+                  // better here than as the last item among the chips.
+                  <FilterChip
+                    active={followingOnly}
+                    ariaPressed={followingOnly}
+                    onClick={() => setFollowingOnly((f) => !f)}
+                    title={
+                      followingOnly
+                        ? "Clear the Following filter"
+                        : "Only accounts you follow"
+                    }
+                    className="inline-flex items-center gap-[5px]"
+                  >
+                    Following
+                    {followingOnly && <X className="w-[12px] h-[12px]" />}
+                  </FilterChip>
+                )}
+                {!hideAddButton && (
+                  <button
+                    onClick={() => setComposing(true)}
+                    className="shrink-0 inline-flex items-center gap-[5px] font-body font-semibold text-xs px-[10px] py-[4px] rounded-control border border-brand bg-brand text-ink-inverse hover:bg-brand-hover hover:border-brand-hover cursor-pointer transition-colors"
+                  >
+                    <Plus className="w-[13px] h-[13px]" />
+                    {/* Two labels, one shown at a time: at narrow widths the
+                        row needs the space more than the sentence. */}
+                    <span className="max-[1010px]:hidden">
+                      Add Your Perspective
+                    </span>
+                    <span className="hidden max-[1010px]:inline">Add</span>
+                  </button>
+                )}
+              </div>
             </div>
             {/* Parked: the narrowing row that sat closest to the cards.
                 Account type moved up to the picker and Following with it,
