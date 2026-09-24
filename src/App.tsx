@@ -28,9 +28,11 @@ export default function App() {
     <SourcesProvider value={SOURCES}>
       <div className="bg-ground min-h-screen font-body text-ink overflow-x-clip">
         <SiteNav />
-        {/* Nothing is pinned above the feed here, so its own sticky filter bar
-            sticks to the top of the window. */}
-        <main className="mx-auto max-w-[1180px] px-[20px] sm:px-[32px] pt-[20px] sm:pt-[32px] pb-[140px] [--pinned-h:0px]">
+        {/* Below lg the nav is pinned, so the feed's sticky filter bar sticks
+            under it: the nav's height plus its 1px bottom rule. From lg up
+            nothing is pinned above the feed and the bar sticks to the top of
+            the window. */}
+        <main className="mx-auto max-w-[1180px] px-[20px] sm:px-[32px] pt-[20px] sm:pt-[32px] pb-[140px] [--pinned-h:calc(var(--nav-h)_+_1px)] lg:[--pinned-h:0px]">
           <Chapter
             id="testimony"
             question="What is the public saying?"
