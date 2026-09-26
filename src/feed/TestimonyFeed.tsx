@@ -105,6 +105,9 @@ export function TestimonyEntry({
   onOpen,
   fullBody = false,
   hideAvatar = false,
+  stackControlsNarrow = false,
+  chipBelowHeaderNarrow = false,
+  dateAboveBodyNarrow = false,
 }: {
   t: TestimonyItem;
   showTypeIcon?: boolean;
@@ -118,6 +121,16 @@ export function TestimonyEntry({
   fullBody?: boolean;
   /** Omit the avatar, for views that already show it above the card. */
   hideAvatar?: boolean;
+  /** At 390px and below, put the date and menu on their own line at the top
+      right, with the avatar and name block together below them. */
+  stackControlsNarrow?: boolean;
+  /** At 440px and below, move the stance chip from the name line to its own
+      line beneath the avatar and name. */
+  chipBelowHeaderNarrow?: boolean;
+  /** Below sm, move the date from the name line to its own line under the
+      header, aligned right, just above the body, and hold the name line to one
+      line, truncating the name with an ellipsis when it does not fit. */
+  dateAboveBodyNarrow?: boolean;
 }) {
   const user = POSITION_USERS.find((u) => u.id === t.userId);
   if (!user) return null;
@@ -126,17 +139,32 @@ export function TestimonyEntry({
   // together with it and never land on a line alone.
   const words = user.name.split(" ");
   const lastWord = words.pop();
+  const stack = (cls: string) => (stackControlsNarrow ? cls : "");
   const showDesc =
     showDescriptor === true ||
     (showDescriptor === "officials" && user.userType !== "organization");
   return (
     <div className="relative p-[16px] sm:p-[20px] rounded-control">
+      {/* Its own line above the avatar and name, which move down together.
+          The corner copy below is hidden at the same width. */}
+      {stackControlsNarrow && (
+        <div className="hidden max-[391px]:flex justify-end items-center gap-[2px] -mt-[5px] -mr-[6px] mb-[4px]">
+          <span className="font-body text-xs text-ink-muted whitespace-nowrap mr-[2px]">
+            {t.date}
+          </span>
+          <EntryActions name={user.name} />
+        </div>
+      )}
       <div className="relative flex items-start sm:items-center gap-[14px] sm:gap-[18px]">
         {!hideAvatar && <UserAvatar user={user} />}
         <div className="flex-1 min-w-0">
           {/* Name, type and stance wrap inside their own box; the date sits
               outside it so it always holds the top-right corner. */}
-          <div className="flex items-center gap-[6px]">
+          <div
+            className={`flex items-center gap-[6px] ${
+              dateAboveBodyNarrow ? "max-sm:gap-0" : ""
+            }`}
+          >
             <div className="flex-1 min-w-0">
               {/* The name and descriptor are one block. On phones the date
                   sits beside it, lined up with the name; from sm up the date
@@ -149,22 +177,47 @@ export function TestimonyEntry({
                       it as a link before there is a URL behind it teaches the wrong
                       thing about what clicking a name does. `onOpen` is kept so the
                       wiring is here when the route is. */}
-                  <p className="font-body font-semibold text-base text-ink leading-[1.3]">
-                    {words.length > 0 && `${words.join(" ")} `}
-                    <span className="whitespace-nowrap">
-                      {lastWord}
+                  {dateAboveBodyNarrow ? (
+                    // One line on phones: the name gives way with an ellipsis
+                    // so the icon and chip always stay beside it. The full
+                    // name is in the title.
+                    <p className="flex items-center gap-[6px] sm:flex-wrap font-body font-semibold text-base text-ink leading-[1.3]">
+                      <span title={user.name} className="min-w-0 max-sm:truncate">
+                        {user.name}
+                      </span>
                       {showTypeIcon && (
-                        <span className="inline-block align-middle ml-[6px]">
+                        <span className="shrink-0 flex">
                           <UserTypeIcon type={user.userType} />
                         </span>
                       )}
                       {t.stance !== "no-position" && (
-                        <span className="inline-block align-middle ml-[6px] -my-[2px]">
+                        <span className="shrink-0 flex">
                           <StanceChip stance={t.stance} />
                         </span>
                       )}
-                    </span>
-                  </p>
+                    </p>
+                  ) : (
+                    <p className="font-body font-semibold text-base text-ink leading-[1.3]">
+                      {words.length > 0 && `${words.join(" ")} `}
+                      <span className="whitespace-nowrap">
+                        {lastWord}
+                        {showTypeIcon && (
+                          <span className="inline-block align-middle ml-[6px]">
+                            <UserTypeIcon type={user.userType} />
+                          </span>
+                        )}
+                        {t.stance !== "no-position" && (
+                          <span
+                            className={`inline-block align-middle ml-[6px] -my-[2px] ${
+                              chipBelowHeaderNarrow ? "max-[441px]:hidden" : ""
+                            }`}
+                          >
+                            <StanceChip stance={t.stance} />
+                          </span>
+                        )}
+                      </span>
+                    </p>
+                  )}
                   {/* Inside the name's own cell, not below the whole row: it
                       describes the account, so it belongs to the name, and the date
                       should centre against the pair rather than against the name
@@ -175,13 +228,23 @@ export function TestimonyEntry({
                     </p>
                   )}
                 </div>
-                <span className="sm:hidden shrink-0 font-body text-xs text-ink-muted whitespace-nowrap">
+                <span
+                  className={`sm:hidden shrink-0 font-body text-xs text-ink-muted whitespace-nowrap ${stack(
+                    "max-[391px]:hidden",
+                  )} ${dateAboveBodyNarrow ? "hidden" : ""}`}
+                >
                   {t.date}
                 </span>
               </div>
             </div>
-            <div className="shrink-0 self-start flex items-center gap-[2px] -mt-[5px] -mr-[6px]">
-              <span className="hidden sm:inline font-body text-xs text-ink-muted whitespace-nowrap mr-[2px]">
+            <div
+              className={`shrink-0 self-start flex items-center gap-[2px] -mt-[5px] -mr-[6px] ${stack(
+                "max-[391px]:hidden",
+              )}`}
+            >
+              <span
+                className="hidden sm:inline font-body text-xs text-ink-muted whitespace-nowrap mr-[2px]"
+              >
                 {t.date}
               </span>
               <EntryActions name={user.name} />
@@ -189,6 +252,16 @@ export function TestimonyEntry({
           </div>
         </div>
       </div>
+      {dateAboveBodyNarrow && (
+        <p className="sm:hidden mt-[8px] text-right font-body text-xs text-ink-muted">
+          {t.date}
+        </p>
+      )}
+      {chipBelowHeaderNarrow && t.stance !== "no-position" && (
+        <div className="hidden max-[441px]:flex mt-[10px]">
+          <StanceChip stance={t.stance} />
+        </div>
+      )}
       {/* The body sits in the same two-column frame the header does, with an
           empty cell where the avatar is, so its first character lands under the
           name rather than under the avatar. A spacer rather than a left
@@ -357,11 +430,23 @@ const STANCE_GLYPHS: {
 
 export type TypeFilter = "all" | PositionUserType;
 
-const TYPE_FILTERS: { id: TypeFilter; label: string; word?: string }[] = [
+// `short` replaces the label once the filter is selected, where the picker has
+// less room than the dropdown list; the list always shows `label`.
+const TYPE_FILTERS: {
+  id: TypeFilter;
+  label: string;
+  short?: string;
+  word?: string;
+}[] = [
   { id: "all", label: "All Accounts" },
   { id: "individual", label: "Individuals", word: "Individual" },
   { id: "organization", label: "Organizations", word: "Organization" },
-  { id: "government", label: "Government Officials", word: "Government" },
+  {
+    id: "government",
+    label: "Government Officials",
+    short: "Gov Officials",
+    word: "Government",
+  },
   { id: "legislator", label: "Legislators", word: "Legislator" },
 ];
 
@@ -399,7 +484,7 @@ function TypeFilterMenu({
         ) : (
           <UserTypeIcon type={current.id} size={13} />
         )}
-        {current.label}
+        {current.short ?? current.label}
         <ChevronDown className="w-[12px] h-[12px]" />
       </button>
       {open && (
@@ -727,12 +812,23 @@ export function PositionPicker({
   value,
   onChange,
   locked = false,
+  labeled = false,
+  largeOnPhones = false,
 }: {
   value: StanceFilter;
   onChange: (v: StanceFilter) => void;
   /** State the position without offering to change or clear it. */
   locked?: boolean;
+  /** Keep the words beside the glyphs above 390px wide, instead of only
+      from 730px up. */
+  labeled?: boolean;
+  /** Larger glyphs, words and tap targets below sm, with more space between
+      the options. */
+  largeOnPhones?: boolean;
 }) {
+  const rowH = largeOnPhones ? "h-[40px] sm:h-[34px]" : "h-[34px]";
+  const glyphSize = largeOnPhones ? "text-[24px] sm:text-[20px]" : "text-[20px]";
+  const wordSize = largeOnPhones ? "text-base sm:text-sm" : "text-sm";
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -756,16 +852,16 @@ export function PositionPicker({
   if (locked) {
     if (!current) return null;
     return (
-      <p className="flex h-[34px] items-center gap-[8px]">
+      <p className={`flex ${rowH} items-center gap-[8px]`}>
         <span
           aria-hidden
-          className={`flex h-full items-center text-[20px] leading-none drop-shadow-[0_1px_1px_rgba(20,20,19,0.12)] ${
+          className={`flex h-full items-center ${glyphSize} leading-none drop-shadow-[0_1px_1px_rgba(20,20,19,0.12)] ${
             current.chipOffset ?? ""
           }`}
         >
           {current.glyph}
         </span>
-        <span className="flex h-full items-center font-body font-semibold text-sm leading-none text-ink whitespace-nowrap">
+        <span className={`flex h-full items-center font-body font-semibold ${wordSize} leading-none text-ink whitespace-nowrap`}>
           {current.tip}
         </span>
       </p>
@@ -782,18 +878,24 @@ export function PositionPicker({
       <div
         role="group"
         aria-label="Filter by position"
-        className="flex h-[34px] items-center"
+        className={`flex ${rowH} items-center ${
+          largeOnPhones ? "max-sm:gap-[12px]" : ""
+        }`}
       >
         {STANCE_GLYPHS.map(({ id, tip, glyph, chipOffset }) => (
           <button
             key={id}
             onClick={() => onChange(id)}
             aria-label={tip}
-            className="flex h-full items-center gap-0 min-[730px]:gap-[8px] px-[9px] rounded-pill hover:bg-wash cursor-pointer transition-colors duration-150"
+            className={`flex h-full items-center px-[9px] rounded-pill hover:bg-wash cursor-pointer transition-colors duration-150 ${
+              labeled
+                ? "gap-[8px] max-[391px]:gap-0"
+                : "gap-0 min-[730px]:gap-[8px]"
+            }`}
           >
             <span
               aria-hidden
-              className={`flex h-full items-center text-[20px] leading-none drop-shadow-[0_1px_1px_rgba(20,20,19,0.12)] ${
+              className={`flex h-full items-center ${glyphSize} leading-none drop-shadow-[0_1px_1px_rgba(20,20,19,0.12)] ${
                 chipOffset ?? ""
               }`}
             >
@@ -807,7 +909,9 @@ export function PositionPicker({
                 stating the filter you are looking at. */}
             <span
               aria-hidden
-              className="hidden min-[730px]:flex h-full items-center font-body font-semibold text-sm leading-none text-ink whitespace-nowrap"
+              className={`${
+                labeled ? "flex max-[391px]:hidden" : "hidden min-[730px]:flex"
+              } h-full items-center font-body font-semibold ${wordSize} leading-none text-ink whitespace-nowrap`}
             >
               {tip}
             </span>
@@ -827,7 +931,7 @@ export function PositionPicker({
           The X then stacks its own round wash on top of that, which is how it
           reads as a second target inside the first rather than as a hole in
           it. */}
-      <div className="relative flex items-center h-[34px] pr-[4px] rounded-pill border border-line hover:bg-wash transition-colors">
+      <div className={`relative flex items-center ${rowH} pr-[4px] rounded-pill border border-line hover:bg-wash transition-colors`}>
         <button
           onClick={() => setOpen((o) => !o)}
           aria-haspopup="listbox"
@@ -842,13 +946,13 @@ export function PositionPicker({
               nothing structural can derive it. */}
           <span
             aria-hidden
-            className={`flex h-full items-center text-[20px] leading-none drop-shadow-[0_1px_1px_rgba(20,20,19,0.12)] ${
+            className={`flex h-full items-center ${glyphSize} leading-none drop-shadow-[0_1px_1px_rgba(20,20,19,0.12)] ${
               current.chipOffset ?? ""
             }`}
           >
             {current.glyph}
           </span>
-          <span className="flex h-full items-center font-body font-semibold text-sm leading-none text-ink whitespace-nowrap">
+          <span className={`flex h-full items-center font-body font-semibold ${wordSize} leading-none text-ink whitespace-nowrap`}>
             {current.tip}
           </span>
         </button>
@@ -901,12 +1005,18 @@ export function AccountTypePicker({
   value,
   onChange,
   locked = false,
+  largeOnPhones = false,
 }: {
   value: TypeFilter;
   onChange: (v: TypeFilter) => void;
   /** State the filter without offering to change it. */
   locked?: boolean;
+  /** Larger label and tap target below sm. */
+  largeOnPhones?: boolean;
 }) {
+  const size = largeOnPhones
+    ? "h-[40px] sm:h-[28px] text-lg"
+    : "h-[28px] text-base sm:text-lg";
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -924,7 +1034,8 @@ export function AccountTypePicker({
   }, [open]);
 
   const current = TYPE_FILTERS.find((t) => t.id === value) ?? TYPE_FILTERS[0];
-  const label = current.id === "all" ? "All users" : current.label;
+  const label =
+    current.id === "all" ? "All users" : (current.short ?? current.label);
   const icon =
     current.id === "all" ? (
       <Users className="w-[17px] h-[17px]" />
@@ -935,7 +1046,7 @@ export function AccountTypePicker({
   // not focusable, so nothing about it suggests it can be changed.
   if (locked) {
     return (
-      <p className="shrink-0 inline-flex h-[28px] items-center gap-[7px] font-display font-medium text-base sm:text-lg uppercase tracking-[0.08em] text-ink">
+      <p className={`shrink-0 inline-flex ${size} items-center gap-[7px] font-display font-medium uppercase tracking-[0.08em] text-ink`}>
         {icon}
         {label}
       </p>
@@ -948,7 +1059,7 @@ export function AccountTypePicker({
         aria-haspopup="listbox"
         aria-label="Filter by account type"
         aria-expanded={open}
-        className="inline-flex h-[28px] items-center gap-[7px] font-display font-medium text-base sm:text-lg uppercase tracking-[0.08em] text-ink hover:text-brand cursor-pointer transition-colors"
+        className={`inline-flex ${size} items-center gap-[7px] font-display font-medium uppercase tracking-[0.08em] text-ink hover:text-brand cursor-pointer transition-colors`}
       >
         {icon}
         {label}
@@ -1003,6 +1114,10 @@ export function TestimonyFeed({
   lockTypeFilter = false,
   pageSize,
   composeSignal = 0,
+  positionRow = "inline",
+  stackControlsNarrow = false,
+  chipBelowHeaderNarrow = false,
+  dateAboveBodyNarrow = false,
   typeFilter: controlledType,
   onTypeFilterChange,
   filter: controlledFilter,
@@ -1032,6 +1147,16 @@ export function TestimonyFeed({
       Maple leaf's nudge: a counter rather than a boolean, so repeat requests
       still register. */
   composeSignal?: number;
+  /** Where the position picker sits: in the filter row, or on its own line
+      beneath it, either collapsing to glyphs below 730px ("below") or keeping
+      its words above 390px ("below-labeled"). */
+  positionRow?: "inline" | "below" | "below-labeled";
+  /** Passed to each card. See TestimonyEntry. */
+  stackControlsNarrow?: boolean;
+  /** Passed to each card. See TestimonyEntry. */
+  chipBelowHeaderNarrow?: boolean;
+  /** Passed to each card. See TestimonyEntry. */
+  dateAboveBodyNarrow?: boolean;
   /** Add a "Following" toggle that narrows any stance filter to accounts the
       viewer follows. */
   includeFollowingFilter?: boolean;
@@ -1185,8 +1310,11 @@ export function TestimonyFeed({
                 value={typeFilter}
                 onChange={setTypeFilter}
                 locked={lockTypeFilter}
+                largeOnPhones={positionRow !== "inline"}
               />
-              <PositionPicker value={filter} onChange={setFilter} />
+              {positionRow === "inline" && (
+                <PositionPicker value={filter} onChange={setFilter} />
+              )}
               {/* Following and the action are one group pinned to the end of
                   the row, with their own spacing. Held together rather than
                   laid out as two more items in the filter row, so a wider
@@ -1206,7 +1334,11 @@ export function TestimonyFeed({
                         ? "Clear the Following filter"
                         : "Only accounts you follow"
                     }
-                    className="inline-flex items-center gap-[5px]"
+                    className={`inline-flex items-center gap-[5px] ${
+                      positionRow !== "inline"
+                        ? "max-sm:text-sm max-sm:px-[14px] max-sm:py-[5px]"
+                        : ""
+                    }`}
                   >
                     Following
                     {followingOnly && <X className="w-[12px] h-[12px]" />}
@@ -1228,6 +1360,16 @@ export function TestimonyFeed({
                 )}
               </div>
             </div>
+            {positionRow !== "inline" && (
+              <div className="flex mb-[12px]">
+                <PositionPicker
+                  value={filter}
+                  onChange={setFilter}
+                  labeled={positionRow === "below-labeled"}
+                  largeOnPhones
+                />
+              </div>
+            )}
             {/* Parked: the narrowing row that sat closest to the cards.
                 Account type moved up to the picker and Following with it,
                 so this held only the superseded stance controls. */}
@@ -1318,6 +1460,9 @@ export function TestimonyFeed({
                   showTypeIcon={showTypeIcon}
                   showDescriptor={showDescriptor}
                   onOpen={setOpenId}
+                  stackControlsNarrow={stackControlsNarrow}
+                  chipBelowHeaderNarrow={chipBelowHeaderNarrow}
+                  dateAboveBodyNarrow={dateAboveBodyNarrow}
                 />
               </div>
             ))}

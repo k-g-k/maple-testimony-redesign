@@ -17,7 +17,24 @@ import {
  * set them too; here nothing else does, and the wiring is kept so the two stay
  * comparable.
  */
-export default function App() {
+export default function App({
+  positionRow = "inline",
+  stackControlsNarrow = false,
+  chipBelowHeaderNarrow = false,
+  dateAboveBodyNarrow = false,
+}: {
+  /** Where the feed's position picker sits. See TestimonyFeed. */
+  positionRow?: "inline" | "below" | "below-labeled";
+  /** Put each card's date and menu on their own line above the name at 390px
+      and below. */
+  stackControlsNarrow?: boolean;
+  /** Put each card's stance chip on its own line under the avatar and name at
+      440px and below. */
+  chipBelowHeaderNarrow?: boolean;
+  /** Put each card's date on its own line above the body, aligned right, and
+      hold the name to one line with an ellipsis, on phones. */
+  dateAboveBodyNarrow?: boolean;
+}) {
   const [stance, setStance] = useState<StanceFilter>("all");
   const [accountType, setAccountType] = useState<TypeFilter>("all");
   // A counter rather than a boolean: the button can ask for the composer again
@@ -48,6 +65,10 @@ export default function App() {
               items={testimonyFor(() => true)}
               stickyTop="var(--pinned-h)"
               includeFollowingFilter
+              positionRow={positionRow}
+              stackControlsNarrow={stackControlsNarrow}
+              chipBelowHeaderNarrow={chipBelowHeaderNarrow}
+              dateAboveBodyNarrow={dateAboveBodyNarrow}
               includeTypeFilter
               asCards
             />
