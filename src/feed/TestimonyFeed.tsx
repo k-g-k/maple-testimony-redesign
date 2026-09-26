@@ -121,6 +121,11 @@ export function TestimonyEntry({
 }) {
   const user = POSITION_USERS.find((u) => u.id === t.userId);
   if (!user) return null;
+  // The name, type icon and stance chip run as one line of text and wrap word
+  // by word. The icon and chip are held to the name's last word, so they wrap
+  // together with it and never land on a line alone.
+  const words = user.name.split(" ");
+  const lastWord = words.pop();
   const showDesc =
     showDescriptor === true ||
     (showDescriptor === "officials" && user.userType !== "organization");
@@ -133,33 +138,47 @@ export function TestimonyEntry({
               outside it so it always holds the top-right corner. */}
           <div className="flex items-center gap-[6px]">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-[6px] flex-wrap">
-              {/* Plain text for now. The name should be a link to the
-                  testimony's own page, and it will be an anchor when that page
-                  exists; a button that opens a modal is not that, and dressing
-                  it as a link before there is a URL behind it teaches the wrong
-                  thing about what clicking a name does. `onOpen` is kept so the
-                  wiring is here when the route is. */}
-                <p className="font-body font-semibold text-base text-ink leading-[1.3]">
-                  {user.name}
-                </p>
-                {showTypeIcon && <UserTypeIcon type={user.userType} />}
-                {t.stance !== "no-position" && <StanceChip stance={t.stance} />}
+              {/* The name and descriptor are one block. On phones the date
+                  sits beside it, lined up with the name; from sm up the date
+                  sits in the corner beside the menu instead. */}
+              <div className="flex items-baseline gap-[10px]">
+                <div className="flex-1 min-w-0">
+                  {/* Plain text for now. The name should be a link to the
+                      testimony's own page, and it will be an anchor when that page
+                      exists; a button that opens a modal is not that, and dressing
+                      it as a link before there is a URL behind it teaches the wrong
+                      thing about what clicking a name does. `onOpen` is kept so the
+                      wiring is here when the route is. */}
+                  <p className="font-body font-semibold text-base text-ink leading-[1.3]">
+                    {words.length > 0 && `${words.join(" ")} `}
+                    <span className="whitespace-nowrap">
+                      {lastWord}
+                      {showTypeIcon && (
+                        <span className="inline-block align-middle ml-[6px]">
+                          <UserTypeIcon type={user.userType} />
+                        </span>
+                      )}
+                      {t.stance !== "no-position" && (
+                        <span className="inline-block align-middle ml-[6px] -my-[2px]">
+                          <StanceChip stance={t.stance} />
+                        </span>
+                      )}
+                    </span>
+                  </p>
+                  {/* Inside the name's own cell, not below the whole row: it
+                      describes the account, so it belongs to the name, and the date
+                      should centre against the pair rather than against the name
+                      alone. */}
+                  {showDesc && (
+                    <p className="font-body text-xs text-ink-faint leading-[1.4] mt-[1px]">
+                      {user.descriptor}
+                    </p>
+                  )}
+                </div>
+                <span className="sm:hidden shrink-0 font-body text-xs text-ink-muted whitespace-nowrap">
+                  {t.date}
+                </span>
               </div>
-              {/* Inside the name's own cell, not below the whole row: it
-                  describes the account, so it belongs to the name, and the date
-                  should centre against the pair rather than against the name
-                  alone. */}
-              {showDesc && (
-                <p className="font-body text-xs text-ink-faint leading-[1.4] mt-[1px]">
-                  {user.descriptor}
-                </p>
-              )}
-              {/* Narrow, the name needs the whole row, so the date drops in
-                  under it and only the menu keeps the corner. */}
-              <p className="sm:hidden font-body text-xs text-ink-muted leading-[1.4] mt-[1px]">
-                {t.date}
-              </p>
             </div>
             <div className="shrink-0 self-start flex items-center gap-[2px] -mt-[5px] -mr-[6px]">
               <span className="hidden sm:inline font-body text-xs text-ink-muted whitespace-nowrap mr-[2px]">
