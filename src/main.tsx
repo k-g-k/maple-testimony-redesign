@@ -11,8 +11,14 @@ const VARIANTS = {
   "/test": { positionRow: "below" },
   "/test2": { positionRow: "below-labeled" },
 } as const;
-const path = window.location.pathname.replace(/\/$/, "");
-const variant = VARIANTS[path as keyof typeof VARIANTS] ?? DEFAULT;
+// Chosen by ?v=test or ?v=test2, which works on any static host because the
+// page itself is always served from /. The /test and /test2 paths also work
+// wherever the server sends every path to index.html, as the dev server does.
+const fromQuery = new URLSearchParams(window.location.search).get("v");
+const key = fromQuery
+  ? `/${fromQuery}`
+  : window.location.pathname.replace(/\/$/, "");
+const variant = VARIANTS[key as keyof typeof VARIANTS] ?? DEFAULT;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
