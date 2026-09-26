@@ -105,9 +105,7 @@ export function TestimonyEntry({
   onOpen,
   fullBody = false,
   hideAvatar = false,
-  stackControlsNarrow = false,
-  chipBelowHeaderNarrow = false,
-  dateAboveBodyNarrow = false,
+  compactHeaderNarrow = false,
 }: {
   t: TestimonyItem;
   showTypeIcon?: boolean;
@@ -121,16 +119,10 @@ export function TestimonyEntry({
   fullBody?: boolean;
   /** Omit the avatar, for views that already show it above the card. */
   hideAvatar?: boolean;
-  /** At 390px and below, put the date and menu on their own line at the top
-      right, with the avatar and name block together below them. */
-  stackControlsNarrow?: boolean;
-  /** At 440px and below, move the stance chip from the name line to its own
-      line beneath the avatar and name. */
-  chipBelowHeaderNarrow?: boolean;
-  /** Below sm, move the date from the name line to its own line under the
-      header, aligned right, just above the body, and hold the name line to one
-      line, truncating the name with an ellipsis when it does not fit. */
-  dateAboveBodyNarrow?: boolean;
+  /** Below sm, move the date from the name line to the bottom right of the
+      card, under the body, and hold the name line to one line, truncating the
+      name with an ellipsis when it does not fit. */
+  compactHeaderNarrow?: boolean;
 }) {
   const user = POSITION_USERS.find((u) => u.id === t.userId);
   if (!user) return null;
@@ -139,32 +131,17 @@ export function TestimonyEntry({
   // together with it and never land on a line alone.
   const words = user.name.split(" ");
   const lastWord = words.pop();
-  const stack = (cls: string) => (stackControlsNarrow ? cls : "");
   const showDesc =
     showDescriptor === true ||
     (showDescriptor === "officials" && user.userType !== "organization");
   return (
     <div className="relative p-[16px] sm:p-[20px] rounded-control">
-      {/* Its own line above the avatar and name, which move down together.
-          The corner copy below is hidden at the same width. */}
-      {stackControlsNarrow && (
-        <div className="hidden max-[391px]:flex justify-end items-center gap-[2px] -mt-[5px] -mr-[6px] mb-[4px]">
-          <span className="font-body text-xs text-ink-muted whitespace-nowrap mr-[2px]">
-            {t.date}
-          </span>
-          <EntryActions name={user.name} />
-        </div>
-      )}
       <div className="relative flex items-start sm:items-center gap-[14px] sm:gap-[18px]">
         {!hideAvatar && <UserAvatar user={user} />}
         <div className="flex-1 min-w-0">
           {/* Name, type and stance wrap inside their own box; the date sits
               outside it so it always holds the top-right corner. */}
-          <div
-            className={`flex items-center gap-[6px] ${
-              dateAboveBodyNarrow ? "max-sm:gap-0" : ""
-            }`}
-          >
+          <div className="flex items-center gap-[6px]">
             <div className="flex-1 min-w-0">
               {/* The name and descriptor are one block. On phones the date
                   sits beside it, lined up with the name; from sm up the date
@@ -177,7 +154,7 @@ export function TestimonyEntry({
                       it as a link before there is a URL behind it teaches the wrong
                       thing about what clicking a name does. `onOpen` is kept so the
                       wiring is here when the route is. */}
-                  {dateAboveBodyNarrow ? (
+                  {compactHeaderNarrow ? (
                     // One line on phones: the name gives way with an ellipsis
                     // so the icon and chip always stay beside it. The full
                     // name is in the title.
@@ -207,11 +184,7 @@ export function TestimonyEntry({
                           </span>
                         )}
                         {t.stance !== "no-position" && (
-                          <span
-                            className={`inline-block align-middle ml-[6px] -my-[2px] ${
-                              chipBelowHeaderNarrow ? "max-[441px]:hidden" : ""
-                            }`}
-                          >
+                          <span className="inline-block align-middle ml-[6px] -my-[2px]">
                             <StanceChip stance={t.stance} />
                           </span>
                         )}
@@ -229,22 +202,16 @@ export function TestimonyEntry({
                   )}
                 </div>
                 <span
-                  className={`sm:hidden shrink-0 font-body text-xs text-ink-muted whitespace-nowrap ${stack(
-                    "max-[391px]:hidden",
-                  )} ${dateAboveBodyNarrow ? "hidden" : ""}`}
+                  className={`sm:hidden shrink-0 font-body text-xs text-ink-muted whitespace-nowrap ${
+                    compactHeaderNarrow ? "hidden" : ""
+                  }`}
                 >
                   {t.date}
                 </span>
               </div>
             </div>
-            <div
-              className={`shrink-0 self-start flex items-center gap-[2px] -mt-[5px] -mr-[6px] ${stack(
-                "max-[391px]:hidden",
-              )}`}
-            >
-              <span
-                className="hidden sm:inline font-body text-xs text-ink-muted whitespace-nowrap mr-[2px]"
-              >
+            <div className="shrink-0 self-start flex items-center gap-[2px] -mt-[5px] -mr-[6px]">
+              <span className="hidden sm:inline font-body text-xs text-ink-muted whitespace-nowrap mr-[2px]">
                 {t.date}
               </span>
               <EntryActions name={user.name} />
@@ -252,16 +219,6 @@ export function TestimonyEntry({
           </div>
         </div>
       </div>
-      {dateAboveBodyNarrow && (
-        <p className="sm:hidden mt-[8px] text-right font-body text-xs text-ink-muted">
-          {t.date}
-        </p>
-      )}
-      {chipBelowHeaderNarrow && t.stance !== "no-position" && (
-        <div className="hidden max-[441px]:flex mt-[10px]">
-          <StanceChip stance={t.stance} />
-        </div>
-      )}
       {/* The body sits in the same two-column frame the header does, with an
           empty cell where the avatar is, so its first character lands under the
           name rather than under the avatar. A spacer rather than a left
@@ -273,13 +230,23 @@ export function TestimonyEntry({
         {!hideAvatar && (
           <div aria-hidden className="hidden sm:block w-[40px] shrink-0" />
         )}
-        <div className="flex-1 min-w-0 pt-[12px] sm:pt-[8px] sm:pr-[12px] pb-[8px]">
+        <div
+          className={`flex-1 min-w-0 pt-[12px] sm:pt-[8px] sm:pr-[12px] pb-[8px] ${
+            compactHeaderNarrow ? "max-sm:pb-[4px]" : ""
+          }`}
+        >
           {fullBody ? (
             <p className="font-body text-base text-ink leading-[1.55] whitespace-pre-line">
               {t.body}
             </p>
           ) : (
             <ClampedBody text={t.body} />
+          )}
+          {/* On phones the date closes the card, under the body on the right. */}
+          {compactHeaderNarrow && (
+            <p className="sm:hidden mt-[12px] text-right font-body text-xs text-ink-muted">
+              {t.date}
+            </p>
           )}
         </div>
       </div>
@@ -820,7 +787,7 @@ export function PositionPicker({
   /** State the position without offering to change or clear it. */
   locked?: boolean;
   /** Keep the words beside the glyphs above 390px wide, instead of only
-      from 730px up. */
+      from 730px up, and set them a size larger. */
   labeled?: boolean;
   /** Larger glyphs, words and tap targets below sm, with more space between
       the options. */
@@ -828,7 +795,11 @@ export function PositionPicker({
 }) {
   const rowH = largeOnPhones ? "h-[40px] sm:h-[34px]" : "h-[34px]";
   const glyphSize = largeOnPhones ? "text-[24px] sm:text-[20px]" : "text-[20px]";
-  const wordSize = largeOnPhones ? "text-base sm:text-sm" : "text-sm";
+  const wordSize = labeled
+    ? "text-lg sm:text-base"
+    : largeOnPhones
+      ? "text-base sm:text-sm"
+      : "text-sm";
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -981,7 +952,7 @@ export function PositionPicker({
                   onChange(id);
                   setOpen(false);
                 }}
-                className="flex items-center gap-[10px] w-full text-left font-body text-sm text-ink px-[12px] py-[6px] cursor-pointer hover:bg-wash"
+                className="flex items-center gap-[10px] w-full text-left font-body text-sm text-ink px-[12px] py-[10px] cursor-pointer hover:bg-wash"
               >
                 <span
                   aria-hidden
@@ -1006,6 +977,7 @@ export function AccountTypePicker({
   onChange,
   locked = false,
   largeOnPhones = false,
+  larger = false,
 }: {
   value: TypeFilter;
   onChange: (v: TypeFilter) => void;
@@ -1013,10 +985,19 @@ export function AccountTypePicker({
   locked?: boolean;
   /** Larger label and tap target below sm. */
   largeOnPhones?: boolean;
+  /** A larger label on phones and larger text and icons in the dropdown list,
+      to match a labeled PositionPicker beside it. */
+  larger?: boolean;
 }) {
-  const size = largeOnPhones
-    ? "h-[40px] sm:h-[28px] text-lg"
-    : "h-[28px] text-base sm:text-lg";
+  const size = larger
+    ? "h-[40px] sm:h-[28px] text-[18px] sm:text-lg"
+    : largeOnPhones
+      ? "h-[40px] sm:h-[28px] text-lg"
+      : "h-[28px] text-base sm:text-lg";
+  // Icon and chevron track the label, so the larger label on phones gets them
+  // a size up as well.
+  const iconSize = larger ? "size-[19px] sm:size-[17px]" : "size-[17px]";
+  const chevronSize = larger ? "size-[17px] sm:size-[15px]" : "size-[15px]";
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -1038,9 +1019,13 @@ export function AccountTypePicker({
     current.id === "all" ? "All users" : (current.short ?? current.label);
   const icon =
     current.id === "all" ? (
-      <Users className="w-[17px] h-[17px]" />
+      <Users className={iconSize} />
     ) : (
-      <UserTypeIcon type={current.id} size={17} />
+      // UserTypeIcon sizes its svg inline, so the phone size has to win over
+      // that style.
+      <span className={larger ? "flex max-sm:[&_svg]:size-[19px]!" : "flex"}>
+        <UserTypeIcon type={current.id} size={17} />
+      </span>
     );
   // Locked, it is a statement rather than a control: no chevron, no hover, and
   // not focusable, so nothing about it suggests it can be changed.
@@ -1063,12 +1048,14 @@ export function AccountTypePicker({
       >
         {icon}
         {label}
-        <ChevronDown className="w-[15px] h-[15px]" />
+        <ChevronDown className={chevronSize} />
       </button>
       {open && (
         <div
           role="listbox"
-          className="absolute left-0 top-[calc(100%+6px)] z-20 min-w-[200px] bg-surface border border-line rounded-control shadow-popover py-[4px]"
+          className={`absolute left-0 top-[calc(100%+6px)] z-20 ${
+            larger ? "min-w-[240px]" : "min-w-[200px]"
+          } bg-surface border border-line rounded-control shadow-popover py-[4px]`}
         >
           {TYPE_FILTERS.map((t) => (
             <button
@@ -1079,15 +1066,21 @@ export function AccountTypePicker({
                 onChange(t.id);
                 setOpen(false);
               }}
-              className={`flex items-center gap-[8px] w-full text-left font-body text-sm px-[12px] py-[6px] cursor-pointer hover:bg-wash ${
-                t.id === value ? "font-semibold text-brand" : "text-ink"
-              }`}
+              className={`flex items-center w-full text-left font-body px-[12px] py-[10px] cursor-pointer hover:bg-wash ${
+                larger ? "gap-[10px] text-lg sm:text-base" : "gap-[8px] text-sm"
+              } ${t.id === value ? "font-semibold text-brand" : "text-ink"}`}
             >
-              <span className="w-[15px] shrink-0 flex items-center justify-center">
+              <span
+                className={`${
+                  larger ? "w-[18px]" : "w-[15px]"
+                } shrink-0 flex items-center justify-center`}
+              >
                 {t.id === "all" ? (
-                  <Users className="w-[15px] h-[15px]" />
+                  <Users
+                    className={larger ? "w-[18px] h-[18px]" : "w-[15px] h-[15px]"}
+                  />
                 ) : (
-                  <UserTypeIcon type={t.id} />
+                  <UserTypeIcon type={t.id} size={larger ? 18 : 15} />
                 )}
               </span>
               {t.label}
@@ -1115,9 +1108,7 @@ export function TestimonyFeed({
   pageSize,
   composeSignal = 0,
   positionRow = "inline",
-  stackControlsNarrow = false,
-  chipBelowHeaderNarrow = false,
-  dateAboveBodyNarrow = false,
+  compactHeaderNarrow = false,
   typeFilter: controlledType,
   onTypeFilterChange,
   filter: controlledFilter,
@@ -1152,11 +1143,7 @@ export function TestimonyFeed({
       its words above 390px ("below-labeled"). */
   positionRow?: "inline" | "below" | "below-labeled";
   /** Passed to each card. See TestimonyEntry. */
-  stackControlsNarrow?: boolean;
-  /** Passed to each card. See TestimonyEntry. */
-  chipBelowHeaderNarrow?: boolean;
-  /** Passed to each card. See TestimonyEntry. */
-  dateAboveBodyNarrow?: boolean;
+  compactHeaderNarrow?: boolean;
   /** Add a "Following" toggle that narrows any stance filter to accounts the
       viewer follows. */
   includeFollowingFilter?: boolean;
@@ -1258,25 +1245,12 @@ export function TestimonyFeed({
             typeFilter,
         )
       : filtered;
-  // Following only earns a place when it would find something. Offering it on a
-  // list with nobody followed in it is a control whose only outcome is an empty
-  // state. Measured against the stance and type narrowing but not against
-  // itself, so turning it on cannot hide the way back off.
-  const typeMatched =
-    showFilters && includeTypeFilter && typeFilter !== "all"
-      ? stanceMatched.filter(
-          (t) =>
-            POSITION_USERS.find((u) => u.id === t.userId)?.userType ===
-            typeFilter,
-        )
-      : stanceMatched;
-  const hasFollowedInView = typeMatched.some(
-    (t) => POSITION_USERS.find((u) => u.id === t.userId)?.followedByViewer,
-  );
-
   // Paged, the feed fits a fixed height instead of scrolling inside one. The
   // page is clamped rather than reset, so narrowing the list while on a later
   // page lands on the last one that still has entries instead of an empty view.
+  // Only an Individuals filter on its own means nobody has written yet; with
+  // Following on, the empty list is about who you follow.
+  const noIndividuals = typeFilter === "individual" && !followingOnly;
   const pageCount = pageSize ? Math.max(1, Math.ceil(shown.length / pageSize)) : 1;
   const current = Math.min(page, pageCount - 1);
   const paged = pageSize
@@ -1311,6 +1285,7 @@ export function TestimonyFeed({
                 onChange={setTypeFilter}
                 locked={lockTypeFilter}
                 largeOnPhones={positionRow !== "inline"}
+                larger={positionRow === "below-labeled"}
               />
               {positionRow === "inline" && (
                 <PositionPicker value={filter} onChange={setFilter} />
@@ -1321,7 +1296,7 @@ export function TestimonyFeed({
                   account picker or a selected position moves the filters on the
                   left without moving this pair or the gap inside it. */}
               <div className="ml-auto shrink-0 flex items-center gap-[8px]">
-                {includeFollowingFilter && hasFollowedInView && (
+                {includeFollowingFilter && (
                   // Following is an overlay on whatever else is set rather than
                   // another way to narrow by position or account, so it reads
                   // better here than as the last item among the chips.
@@ -1460,9 +1435,7 @@ export function TestimonyFeed({
                   showTypeIcon={showTypeIcon}
                   showDescriptor={showDescriptor}
                   onOpen={setOpenId}
-                  stackControlsNarrow={stackControlsNarrow}
-                  chipBelowHeaderNarrow={chipBelowHeaderNarrow}
-                  dateAboveBodyNarrow={dateAboveBodyNarrow}
+                  compactHeaderNarrow={compactHeaderNarrow}
                 />
               </div>
             ))}
@@ -1480,21 +1453,22 @@ export function TestimonyFeed({
         </>
       ) : (
         // Individuals is the one empty result a visitor can act on themselves,
-        // so it keeps the invitation; every other empty result only offers a
-        // way back out of the filters.
+        // so it keeps the invitation; every other empty result, including
+        // Following with nobody followed in view, only offers a way back out
+        // of the filters.
         <div className="border-[1.5px] border-dashed border-line-strong rounded-panel p-[22px] text-center bg-surface">
           <p className="font-body font-semibold text-lg text-ink mb-[4px]">
-            {typeFilter === "individual"
+            {noIndividuals
               ? "No individual testimony yet"
               : "No testimony matches these filters"}
           </p>
           <p className="font-body text-sm text-ink-muted leading-[1.5] max-w-[560px] mx-auto">
-            {typeFilter === "individual"
+            {noIndividuals
               ? "No residents have submitted testimony on this question yet. Be among the first to add your perspective."
               : "Try widening your selection to see submissions on this question."}
           </p>
           <div className="flex gap-[10px] justify-center mt-[14px] flex-wrap">
-            {typeFilter === "individual" && (
+            {noIndividuals && (
               <button
                 onClick={() => setComposing(true)}
                 className="bg-brand text-ink-inverse font-body font-semibold text-sm px-[18px] py-[8px] rounded-pill cursor-pointer hover:bg-brand-hover"

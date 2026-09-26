@@ -3,25 +3,13 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./styles/index.css";
 
-// Layout variants of the same page, for comparing side by side. /test puts
-// the position picker on its own line and, at 390px and below, each card's
-// date and menu on a line above the name; /test2 puts the picker on its own
-// line and keeps its words above 390px; /test3 puts the picker on its own line
-// and, at 440px and below, each card's stance chip on a line under the avatar
-// and name; /test4 is the main page with each card's date on its own line
-// above the body, aligned right, and the name held to one line with an
-// ellipsis, on phones.
-const DEFAULT = {
-  positionRow: "inline",
-  stackControlsNarrow: false,
-  chipBelowHeaderNarrow: false,
-  dateAboveBodyNarrow: false,
-} as const;
+// Layout variants of the same page, for comparing the filter row side by side.
+// /test puts the position picker on its own line; /test2 does the same and
+// keeps its words above 390px.
+const DEFAULT = { positionRow: "inline" } as const;
 const VARIANTS = {
-  "/test": { ...DEFAULT, positionRow: "below", stackControlsNarrow: true },
-  "/test2": { ...DEFAULT, positionRow: "below-labeled" },
-  "/test3": { ...DEFAULT, positionRow: "below", chipBelowHeaderNarrow: true },
-  "/test4": { ...DEFAULT, dateAboveBodyNarrow: true },
+  "/test": { positionRow: "below" },
+  "/test2": { positionRow: "below-labeled" },
 } as const;
 const path = window.location.pathname.replace(/\/$/, "");
 const variant = VARIANTS[path as keyof typeof VARIANTS] ?? DEFAULT;
