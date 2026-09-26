@@ -75,9 +75,11 @@ function ClampedBody({ text }: { text: string }) {
       <p
         ref={measureRef}
         aria-hidden="true"
-        className="font-body text-base leading-[1.55] absolute invisible pointer-events-none"
+        className="font-body text-sm sm:text-base leading-[1.55] absolute invisible pointer-events-none"
       />
-      <p className="font-body text-base text-ink leading-[1.55]">
+      {/* Smaller on phones, so the six-line clamp holds more of the
+          testimony. */}
+      <p className="font-body text-sm sm:text-base text-ink leading-[1.55]">
         {collapsed ? `${text.slice(0, cutoff).trimEnd()}… ` : `${text} `}
         {cutoff !== null && (
           <button
@@ -123,8 +125,8 @@ export function TestimonyEntry({
     showDescriptor === true ||
     (showDescriptor === "officials" && user.userType !== "organization");
   return (
-    <div className="relative p-[20px] rounded-control">
-      <div className="relative flex items-center gap-[18px]">
+    <div className="relative p-[16px] sm:p-[20px] rounded-control">
+      <div className="relative flex items-start sm:items-center gap-[14px] sm:gap-[18px]">
         {!hideAvatar && <UserAvatar user={user} />}
         <div className="flex-1 min-w-0">
           {/* Name, type and stance wrap inside their own box; the date sits
@@ -153,9 +155,14 @@ export function TestimonyEntry({
                   {user.descriptor}
                 </p>
               )}
+              {/* Narrow, the name needs the whole row, so the date drops in
+                  under it and only the menu keeps the corner. */}
+              <p className="sm:hidden font-body text-xs text-ink-muted leading-[1.4] mt-[1px]">
+                {t.date}
+              </p>
             </div>
             <div className="shrink-0 self-start flex items-center gap-[2px] -mt-[5px] -mr-[6px]">
-              <span className="font-body text-xs text-ink-muted whitespace-nowrap mr-[2px]">
+              <span className="hidden sm:inline font-body text-xs text-ink-muted whitespace-nowrap mr-[2px]">
                 {t.date}
               </span>
               <EntryActions name={user.name} />
@@ -168,9 +175,13 @@ export function TestimonyEntry({
           name rather than under the avatar. A spacer rather than a left
           padding, because it is the avatar's own width and should change when
           that does. */}
+      {/* Narrow, the spacer goes and the body takes the card's full width;
+          a column of empty space under the avatar costs too much there. */}
       <div className="flex gap-[18px]">
-        {!hideAvatar && <div aria-hidden className="w-[40px] shrink-0" />}
-        <div className="flex-1 min-w-0 pt-[8px] pr-[12px] pb-[8px]">
+        {!hideAvatar && (
+          <div aria-hidden className="hidden sm:block w-[40px] shrink-0" />
+        )}
+        <div className="flex-1 min-w-0 pt-[12px] sm:pt-[8px] sm:pr-[12px] pb-[8px]">
           {fullBody ? (
             <p className="font-body text-base text-ink leading-[1.55] whitespace-pre-line">
               {t.body}
@@ -1150,7 +1161,7 @@ export function TestimonyFeed({
             {/* One row above the cards: the two pickers on the left, Following
                 pinned right. Following is an overlay on whatever they set
                 rather than a third way to narrow, so it sits apart. */}
-            <div className="flex items-center gap-[12px] mb-[12px]">
+            <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] mb-[12px]">
               <AccountTypePicker
                 value={typeFilter}
                 onChange={setTypeFilter}

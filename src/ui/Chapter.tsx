@@ -1,6 +1,7 @@
 // A titled section: the question, an optional action opposite it, and the
 // body beneath. One of the reusable blocks the ballot pages are built from.
 
+import { useLayoutEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
 /**
@@ -19,6 +20,7 @@ export function Chapter({
   adornment,
   answer,
   band,
+  fullWidth,
   children,
 }: {
   id: string;
@@ -41,16 +43,57 @@ export function Chapter({
    * chapter open at hero weight and then drop back to reading weight.
    */
   band?: ReactNode;
+  /**
+   * Lets the question run the full width of the column instead of the 20ch
+   * measure. Below sm it is sized to fill the width on one line, up to the
+   * desktop size; from sm up it steps between fixed sizes and wraps only when
+   * the window runs out of room.
+   */
+  fullWidth?: boolean;
   children?: ReactNode;
 }) {
+  // Below sm the question is set at a reference size, measured, and scaled to
+  // fill the row. It is measured again once the webfont loads, since the
+  // fallback font runs a different width.
+  const rowRef = useRef<HTMLDivElement>(null);
+  const qRef = useRef<HTMLHeadingElement>(null);
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    const q = qRef.current;
+    if (!fullWidth || !row || !q) return;
+    const narrow = window.matchMedia("(max-width: 639.98px)");
+    const fit = () => {
+      q.style.fontSize = "";
+      q.style.whiteSpace = "";
+      if (!narrow.matches) return;
+      q.style.whiteSpace = "nowrap";
+      q.style.fontSize = "100px";
+      const size = Math.min(36, (100 * row.clientWidth) / q.scrollWidth);
+      q.style.fontSize = `${Math.floor(size * 2) / 2}px`;
+    };
+    fit();
+    document.fonts?.ready.then(fit);
+    const ro = new ResizeObserver(fit);
+    ro.observe(row);
+    return () => ro.disconnect();
+  }, [fullWidth, question]);
+
   const heading = (
     <>
       {eyebrow && <div className="mb-[10px]">{eyebrow}</div>}
-      <div className="flex items-start justify-between gap-[20px]">
+      <div
+        ref={rowRef}
+        className="flex items-start justify-between gap-[20px]"
+      >
         <div className="flex items-baseline gap-[14px] flex-wrap min-w-0">
           <h2
+            ref={qRef}
             id={`${id}-q`}
-            className="font-display font-medium text-xl sm:text-2xl lg:text-3xl tracking-display text-ink max-w-[20ch] text-balance"
+            className={`font-display font-medium tracking-display text-ink ${
+              fullWidth
+                ? "text-2xl lg:text-3xl max-sm:leading-[1.25]"
+                : "text-xl sm:text-2xl lg:text-3xl max-w-[20ch] text-balance"
+            }`}
           >
             {question}
           </h2>

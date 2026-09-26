@@ -23,6 +23,10 @@ import { X } from "lucide-react";
 //
 // `asidePinned` (default) makes the aside sticky under the header, so actions
 // stay put while a long body scrolls beside them.
+//
+// Below sm the panel becomes a full-screen sheet and the columns stack, body
+// first and aside after it, whatever `asideFirst` says. `mainMinWidth` only
+// applies from sm up, since a phone has no room to honour it.
 const PAD = 20;
 
 export function Modal({
@@ -88,17 +92,17 @@ export function Modal({
       role="dialog"
       aria-modal="true"
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-[32px]"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 sm:p-[32px]"
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth, minHeight }}
-        className="relative flex w-full max-h-full flex-col overflow-y-auto bg-ground rounded-panel shadow-[0_20px_60px_rgba(0,0,0,0.28)]"
+        className="relative flex w-full h-full sm:h-auto max-h-full flex-col overflow-y-auto bg-ground sm:rounded-panel shadow-[0_20px_60px_rgba(0,0,0,0.28)]"
       >
         <div
           ref={headerRef}
           style={{ padding: `${PAD}px ${PAD}px 12px` }}
-          className="sticky top-0 z-20 flex items-center gap-[12px] bg-ground rounded-t-panel"
+          className="sticky top-0 z-20 flex items-center gap-[12px] bg-ground sm:rounded-t-panel"
         >
           <div className="flex-1 min-w-0">{title}</div>
           <div className="shrink-0 flex items-center gap-[18px]">
@@ -115,20 +119,28 @@ export function Modal({
 
         <div
           style={{ padding: `0 ${PAD}px ${footer ? 0 : PAD}px` }}
-          className={`flex flex-1 items-stretch gap-[16px] ${
-            asideFirst ? "flex-row-reverse" : ""
+          className={`flex flex-1 flex-col sm:flex-row items-stretch gap-[16px] ${
+            asideFirst ? "sm:flex-row-reverse" : ""
           }`}
         >
           <div
-            style={{ minWidth: mainMinWidth }}
-            className={mainMinWidth ? "flex-1" : "flex-1 min-w-0"}
+            style={
+              mainMinWidth
+                ? ({ "--main-min": mainMinWidth } as React.CSSProperties)
+                : undefined
+            }
+            className={`flex-1 min-w-0 ${
+              mainMinWidth ? "sm:min-w-[var(--main-min)]" : ""
+            }`}
           >
             {children}
           </div>
           {aside && (
             <div
               style={asidePinned ? { top: headerH } : undefined}
-              className={`w-[200px] shrink-0 self-start ${asidePinned ? "sticky" : ""}`}
+              className={`w-full sm:w-[200px] shrink-0 self-start ${
+                asidePinned ? "sm:sticky" : ""
+              }`}
             >
               {aside}
             </div>
@@ -138,7 +150,7 @@ export function Modal({
         {footer && (
           <div
             style={{ padding: `12px ${PAD}px ${PAD}px` }}
-            className="sticky bottom-0 z-20 mt-auto bg-ground rounded-b-panel"
+            className="sticky bottom-0 z-20 mt-auto bg-ground sm:rounded-b-panel"
           >
             {footer}
           </div>

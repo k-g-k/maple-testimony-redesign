@@ -62,9 +62,8 @@ export function SiteNav() {
         </button>
       </div>
       {open && (
-        // Laid over the page rather than pushing it down, so opening the menu
-        // doesn't move what you were reading. The header's own bottom rule
-        // already sits above it.
+        // Laid over the page, so opening the menu doesn't move what you were
+        // reading. The header's bottom rule sits above it.
         <div className="lg:hidden absolute inset-x-0 top-full bg-ground border-b border-line shadow-popover">
           <nav className="mx-auto max-w-[1180px] px-[20px] sm:px-[32px] py-[12px] flex flex-col">
             {NAV.map((n) => (

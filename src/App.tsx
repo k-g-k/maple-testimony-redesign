@@ -36,6 +36,7 @@ export default function App() {
           <Chapter
             id="testimony"
             question="What is the public saying?"
+            fullWidth
           >
             <TestimonyFeed
               filter={stance}
