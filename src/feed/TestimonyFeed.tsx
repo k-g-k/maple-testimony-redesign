@@ -677,15 +677,22 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
       mainMinWidth="520px"
       roomyBars
       footer={
-        <div className="flex justify-end">
-          <button className="bg-brand text-ink-inverse font-body font-semibold text-sm px-[18px] py-[8px] rounded-control cursor-pointer hover:bg-brand-hover">
+        // The code of conduct link on the left, the post button on the right.
+        // The button matches the position buttons in size at every width. On
+        // phones the link gets a taller tap area for a thumb, with the extra
+        // height pulled back out of the footer's padding.
+        <div className="flex items-center justify-between gap-[16px]">
+          <button className="max-sm:-my-[8px] max-sm:py-[8px] font-body text-2xs font-semibold leading-[1.5] text-ink-muted hover:text-brand underline underline-offset-2 whitespace-nowrap cursor-pointer">
+            View our Code of Conduct
+          </button>
+          <button className="shrink-0 bg-brand text-ink-inverse font-body font-semibold text-sm max-[440px]:text-[15px] px-[14px] py-[8px] max-[440px]:py-[10px] rounded-control border border-brand cursor-pointer hover:bg-brand-hover hover:border-brand-hover">
             Review and Post
           </button>
         </div>
       }
       title={
         <p className="font-display font-normal text-xl text-ink">
-          Add your perspective on Q{QUESTION.number}
+          What do you think about Q{QUESTION.number}?
         </p>
       }
     >
@@ -693,9 +700,7 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
           whatever height is left, and the text box grows to fill it down to
           the footer. */}
       <div className="h-full flex flex-col gap-[16px] pb-[12px]">
-        {/* A full-width band of darker grey, running edge to edge and up to
-            the header. */}
-        <div className="-mx-[20px] -mt-[20px] px-[20px] py-[16px] bg-sunken">
+        <div className="-mt-[8px] pb-[8px]">
           <p className="font-body font-semibold text-2xs text-ink-muted mb-[8px]">
             Before you post
           </p>
@@ -711,9 +716,6 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
           </ul>
         </div>
         <div className="flex-1 flex flex-col bg-ground rounded-control py-[8px]">
-          <p className="font-body font-semibold text-2xs text-ink-muted mb-[8px]">
-            Your position
-          </p>
           {/* Below 440px the three buttons share the row equally, with larger
               text and emoji to fill the extra width. */}
           <div className="flex gap-[8px] max-[440px]:gap-[6px] flex-wrap mb-[20px]">
@@ -750,19 +752,13 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
             })}
           </div>
 
-          {/* The text box and the code of conduct link under it stretch as one
-              unit to fill the rest of the form; within it, the text box takes
-              all the height the link does not need. */}
+          {/* Stretches to fill the rest of the form, and the text box with it. */}
           <div className="flex-1 flex flex-col">
             <textarea
               rows={6}
               placeholder="What do you want lawmakers and other voters to know about this question?"
               className="flex-1 w-full resize-none bg-surface border border-line-strong rounded-control p-[12px] font-body text-lg text-ink leading-[1.55] placeholder:text-ink-muted focus:outline-none focus:border-brand"
             />
-            {/* Padded top and bottom for a thumb-sized tap area. */}
-            <button className="self-start mt-[4px] py-[8px] font-body text-2xs font-semibold leading-[1.5] text-ink-muted hover:text-brand underline underline-offset-2 cursor-pointer">
-              View our Code of Conduct
-            </button>
           </div>
         </div>
       </div>
