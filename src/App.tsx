@@ -40,19 +40,19 @@ export default function App({
   // Dismissing the notice hides it for the rest of the visit; it comes back
   // on the next page load.
   const [showNotice, setShowNotice] = useState(true);
-  // The close button floats in the top-right corner, so only the first line
-  // of the note makes room for it and the rest run the full width.
+  // The close button is a strip down the note's right side: the X sits at
+  // its top, pushed toward the edge, and the whole strip, including the space
+  // to the X's left, dismisses. The text stays in its own column beside it.
   const notice = (
-    <div className="flow-root">
-      {/* Padded for a thumb, with the padding pulled back out of the layout. */}
+    <div className="flex items-stretch">
+      <div className="flex-1 min-w-0">{DISCLAIMER}</div>
       <button
         onClick={() => setShowNotice(false)}
         aria-label="Dismiss notice"
-        className="float-right ml-[8px] -m-[8px] p-[8px] text-caution-ink hover:opacity-70 cursor-pointer"
+        className="shrink-0 flex items-start -my-[8px] py-[8px] pl-[16px] pr-[8px] -mr-[12px] text-caution-ink hover:opacity-70 cursor-pointer"
       >
-        <X className="size-[16px]" />
+        <X className="size-[16px] mt-[2px]" />
       </button>
-      {DISCLAIMER}
     </div>
   );
 
