@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { SOURCES, testimonyFor } from "./data";
 import { Chapter, SiteNav, SourcesProvider } from "./ui";
 import {
@@ -37,13 +37,33 @@ export default function App({
   // A counter rather than a boolean: the button can ask for the composer again
   // after it has been closed, which a boolean would swallow.
   const [composeSignal, setComposeSignal] = useState(0);
+  // Dismissing the notice hides it for the rest of the visit; it comes back
+  // on the next page load.
+  const [showNotice, setShowNotice] = useState(true);
+  // The close button floats in the top-right corner, so only the first line
+  // of the note makes room for it and the rest run the full width.
+  const notice = (
+    <div className="flow-root">
+      {/* Padded for a thumb, with the padding pulled back out of the layout. */}
+      <button
+        onClick={() => setShowNotice(false)}
+        aria-label="Dismiss notice"
+        className="float-right ml-[8px] -m-[8px] p-[8px] text-caution-ink hover:opacity-70 cursor-pointer"
+      >
+        <X className="size-[16px]" />
+      </button>
+      {DISCLAIMER}
+    </div>
+  );
 
   return (
     <SourcesProvider value={SOURCES}>
       <div className="bg-ground min-h-screen font-body text-ink overflow-x-clip">
-        <div className="sm:hidden bg-caution-soft border-b border-caution-ink/28 px-[20px] py-[12px]">
-          {DISCLAIMER}
-        </div>
+        {showNotice && (
+          <div className="sm:hidden bg-caution-soft border-b border-caution-ink/28 px-[20px] py-[8px]">
+            {notice}
+          </div>
+        )}
         <SiteNav />
         {/* Below lg the nav is pinned, so the feed's sticky filter bar sticks
             under it: the nav's height plus its 1px bottom rule. From lg up
@@ -80,7 +100,9 @@ export default function App({
         <button
           onClick={() => setComposeSignal((n) => n + 1)}
           aria-label="Add your perspective"
-          className="group fixed bottom-[24px] sm:bottom-[76px] right-[24px] z-50 inline-flex items-center h-[52px] pl-[16px] pr-[16px] rounded-pill border border-brand bg-brand text-ink-inverse shadow-panel hover:bg-brand-hover hover:border-brand-hover cursor-pointer transition-colors"
+          className={`group fixed bottom-[24px] ${
+            showNotice ? "sm:bottom-[76px]" : ""
+          } right-[24px] z-50 inline-flex items-center h-[52px] pl-[16px] pr-[16px] rounded-pill border border-brand bg-brand text-ink-inverse shadow-panel hover:bg-brand-hover hover:border-brand-hover cursor-pointer transition-colors`}
         >
           <Plus className="w-[22px] h-[22px] shrink-0" />
           <span className="grid grid-cols-[0fr] group-hover:grid-cols-[1fr] group-focus-visible:grid-cols-[1fr] transition-[grid-template-columns] duration-300 ease-out motion-reduce:transition-none">
@@ -96,16 +118,18 @@ export default function App({
             being the first thing on the page, and a footer that scrolls away is
             a note most readers never reach. On phones it sits at the top
             instead, where it scrolls away rather than covering the feed. */}
-        <footer className="hidden sm:block fixed bottom-0 left-0 right-0 z-40 bg-caution-soft border-t border-caution-ink/28">
-          {/* Parked: the band above the bar, 8px of solid ground and 48px of
-              fade, so content dissolved rather than cutting at the border.
-          <div
-            aria-hidden
-            className="pointer-events-none absolute bottom-[calc(100%+1px)] left-0 right-0 h-[56px] bg-gradient-to-t from-ground from-14% via-ground/80 via-57% to-transparent"
-          />
-          */}
-          <div className="px-[20px] sm:px-[32px] py-[14px]">{DISCLAIMER}</div>
-        </footer>
+        {showNotice && (
+          <footer className="hidden sm:block fixed bottom-0 left-0 right-0 z-40 bg-caution-soft border-t border-caution-ink/28">
+            {/* Parked: the band above the bar, 8px of solid ground and 48px of
+                fade, so content dissolved rather than cutting at the border.
+            <div
+              aria-hidden
+              className="pointer-events-none absolute bottom-[calc(100%+1px)] left-0 right-0 h-[56px] bg-gradient-to-t from-ground from-14% via-ground/80 via-57% to-transparent"
+            />
+            */}
+            <div className="px-[20px] sm:px-[32px] py-[10px]">{notice}</div>
+          </footer>
+        )}
       </div>
     </SourcesProvider>
   );
