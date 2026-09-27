@@ -353,7 +353,7 @@ const STANCE_FILTERS: {
   glyph?: string;
 }[] = [
   { id: "all", label: "All" },
-  { id: "endorsing", label: "Endorsing", glyph: "\u{1F44D}" },
+  { id: "endorsing", label: "Supporting", glyph: "\u{1F44D}" },
   { id: "opposing", label: "Opposing", glyph: "\u{1F44E}" },
   { id: "no-position", label: "Neutral" },
 ];
@@ -364,7 +364,7 @@ const STANCE_FILTERS: {
 const STANCE_GLYPHS: {
   id: Stance;
   label: string;
-  /** What the glyph means, spelled out. The label is for prose ("Endorsing
+  /** What the glyph means, spelled out. The label is for prose ("Supporting
       Testimony"); this is for the tooltip and the accessible name. */
   tip: string;
   /** Optical offset. A transform rather than padding, so it moves what you see
@@ -376,8 +376,8 @@ const STANCE_GLYPHS: {
 }[] = [
   {
     id: "endorsing",
-    label: "Endorsing",
-    tip: "Endorses",
+    label: "Supporting",
+    tip: "Supports",
     glyph: "\u{1F44D}",
   },
   {
@@ -665,15 +665,12 @@ function TestimonyModal({
 function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
   const [stance, setStance] = useState<TestimonyStance>("endorse");
   const choices: { id: TestimonyStance; label: string; glyph: Stance }[] = [
-    { id: "endorse", label: "Endorse", glyph: "endorsing" },
-    { id: "oppose", label: "Oppose", glyph: "opposing" },
-    { id: "no-position", label: "Neutral", glyph: "no-position" },
+    { id: "endorse", label: "I support", glyph: "endorsing" },
+    { id: "oppose", label: "I oppose", glyph: "opposing" },
+    { id: "no-position", label: "No position", glyph: "no-position" },
   ];
   const guidance = (
     <>
-      <p className="font-body font-semibold text-2xs text-ink/65 mb-[8px]">
-        Before you post
-      </p>
       <ul className="list-disc list-outside pl-[16px] space-y-[8px] font-body text-xs text-ink/65 leading-[1.5] marker:text-ink-faint">
         <li>
           Write in your own words. MAPLE does not edit or rank what you say.
@@ -688,15 +685,19 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
       onClose={onClose}
       maxWidth="860px"
       minHeight="520px"
-      mainMinWidth="520px"
       roomyBars
-      title={
-        <p className="font-body font-medium text-lg text-ink">
-          Share Your Perspective
-        </p>
-      }
+      // The header takes the guidance's darker grey at every width: on phones
+      // it joins the band below it, and from sm up the sidebar beneath it.
+      headerClassName="bg-sunken!"
       sidebar={
-        <div className="min-h-full bg-sunken p-[20px] pt-[24px]">{guidance}</div>
+        <div className="min-h-full bg-sunken px-[20px] pt-[4px] pb-[20px]">
+          {guidance}
+        </div>
+      }
+      title={
+        <p className="font-body font-medium text-lg text-ink-muted">
+          Sharing Your Perspective
+        </p>
       }
       footer={
         // The code of conduct link on the left, lined up with the text box's
@@ -718,22 +719,26 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
           posting guidance. The text box grows to fill the height left down to
           the footer. */}
       <div className="h-full flex flex-col gap-[16px] pb-[12px]">
-        <div className="flex-1 flex flex-col bg-ground rounded-control py-[8px]">
+        <div className="flex-1 flex flex-col bg-ground rounded-control pb-[8px]">
           {/* Stretches to fill the rest of the form, and the text box with it. */}
           <div className="flex-1 flex flex-col gap-[16px]">
-            {/* On phones the guidance leads, above the question; from sm up it
-                moves to the modal's sidebar instead. */}
-            <div className="sm:hidden mb-[8px] bg-sunken border border-line-ghost rounded-control p-[16px]">
+            {/* On phones the guidance leads, directly under the header, as a
+                band stretched edge to edge in the header's grey, running over
+                the modal's rail so its text keeps the usual 20px inset. From sm
+                up it moves to the modal's sidebar instead. */}
+            <div className="sm:hidden -ml-[44px] -mr-[20px] -mt-[8px] mb-[8px] px-[20px] pt-[4px] pb-[16px] bg-sunken">
               {guidance}
             </div>
-            <h2 className="mb-[8px] font-display font-medium text-2xl leading-[1.25] text-ink">
+            <h2 className="mt-[8px] sm:mt-[16px] mb-[8px] font-display font-medium text-2xl leading-[1.25] text-ink">
               What do you think about Q{QUESTION.number}?
             </h2>
             {/* The position buttons ride directly on top of the text box. */}
             <div className="flex-1 min-w-0 flex flex-col">
-              {/* Below 440px the three buttons share the row equally, with larger
-                  text and emoji to fill the extra width. */}
-              <div className="flex gap-[8px] max-[440px]:gap-[6px] flex-wrap mb-[12px]">
+              {/* The three buttons share the full width equally at every width.
+                  Below 440px a third of the row is too narrow for emoji and
+                  label side by side, so each stacks its emoji above its label,
+                  and both are larger. */}
+              <div className="grid grid-cols-3 gap-[8px] max-[440px]:gap-[6px] mb-[12px]">
                 {choices.map(({ id, label, glyph }) => {
                   // The same emoji the feed's position filter uses, so the choice
                   // here and the filter there read as one set.
@@ -747,7 +752,7 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
                       aria-pressed={on}
                       // Selected, it wears the same colours the chip on a posted
                       // testimony will, so the choice previews its own result.
-                      className={`inline-flex items-center gap-[8px] max-[440px]:gap-[6px] rounded-control border px-[14px] py-[8px] max-[440px]:flex-1 max-[440px]:justify-center max-[440px]:px-[8px] max-[440px]:py-[10px] font-body font-semibold text-sm max-[440px]:text-[15px] whitespace-nowrap cursor-pointer transition-colors ${
+                      className={`flex items-center justify-center gap-[8px] max-[440px]:flex-col max-[440px]:gap-[4px] rounded-control border px-[14px] max-[440px]:px-[6px] py-[8px] max-[440px]:py-[10px] font-body font-semibold text-sm max-[440px]:text-[15px] whitespace-nowrap max-[440px]:whitespace-normal max-[440px]:text-center max-[440px]:leading-[1.2] cursor-pointer transition-colors ${
                         on
                           ? `${c.bg} border-line-strong ${c.tx}`
                           : "bg-surface border-line-strong text-ink-muted hover:bg-wash"
