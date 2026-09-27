@@ -830,17 +830,21 @@ export function PositionPicker({
   // Below sm the chosen chip goes wide when labeled (full width) or when it
   // fills its row (up to whatever sits beside it).
   const wideChip = labeled || fillRow;
+  // From sm up the options are a step larger than their original 34px row,
+  // 20px glyph and 13px word.
   const rowH = spreadOnPhones
-    ? "h-[46px] sm:h-[34px]"
+    ? "h-[46px] sm:h-[38px]"
     : largeOnPhones
-      ? "h-[40px] sm:h-[34px]"
-      : "h-[34px]";
-  const glyphSize = largeOnPhones ? "text-[24px] sm:text-[20px]" : "text-[20px]";
+      ? "h-[40px] sm:h-[38px]"
+      : "h-[34px] sm:h-[38px]";
+  const glyphSize = largeOnPhones
+    ? "text-[24px] sm:text-[22px]"
+    : "text-[20px] sm:text-[22px]";
   const wordSize = labeled
     ? "text-lg sm:text-base"
     : largeOnPhones
-      ? "text-base sm:text-sm"
-      : "text-sm";
+      ? "text-base"
+      : "text-sm sm:text-base";
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -901,7 +905,7 @@ export function PositionPicker({
             key={id}
             onClick={() => onChange(id)}
             aria-label={tip}
-            className={`flex h-full items-center px-[9px] rounded-pill hover:bg-wash cursor-pointer transition-colors duration-150 ${
+            className={`flex h-full items-center px-[9px] sm:px-[11px] rounded-pill hover:bg-wash cursor-pointer transition-colors duration-150 ${
               labeled
                 ? "gap-[8px] max-sm:gap-0 max-sm:bg-sunken max-sm:shadow-[0_0_4px_rgba(20,20,19,0.14)] max-sm:flex-1 max-sm:justify-center"
                 : `gap-0 sm:gap-[8px] ${

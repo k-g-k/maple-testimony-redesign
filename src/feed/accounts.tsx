@@ -147,7 +147,7 @@ export const STANCE_CHIP: Record<
     bg: "bg-positive-soft",
     bd: "border-positive",
     tx: "text-positive-ink",
-    label: "Endorses",
+    label: "Supports",
   },
   oppose: {
     bg: "bg-negative-soft",
