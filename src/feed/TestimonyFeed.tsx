@@ -830,7 +830,11 @@ export function PositionPicker({
   // Below sm the chosen chip goes wide when labeled (full width) or when it
   // fills its row (up to whatever sits beside it).
   const wideChip = labeled || fillRow;
-  const rowH = largeOnPhones ? "h-[40px] sm:h-[34px]" : "h-[34px]";
+  const rowH = spreadOnPhones
+    ? "h-[46px] sm:h-[34px]"
+    : largeOnPhones
+      ? "h-[40px] sm:h-[34px]"
+      : "h-[34px]";
   const glyphSize = largeOnPhones ? "text-[24px] sm:text-[20px]" : "text-[20px]";
   const wordSize = labeled
     ? "text-lg sm:text-base"
