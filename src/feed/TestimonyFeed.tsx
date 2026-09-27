@@ -669,6 +669,20 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
     { id: "oppose", label: "Oppose", glyph: "opposing" },
     { id: "no-position", label: "Neutral", glyph: "no-position" },
   ];
+  const guidance = (
+    <>
+      <p className="font-body font-semibold text-2xs text-ink/65 mb-[8px]">
+        Before you post
+      </p>
+      <ul className="list-disc list-outside pl-[16px] space-y-[8px] font-body text-xs text-ink/65 leading-[1.5] marker:text-ink-faint">
+        <li>
+          Write in your own words. MAPLE does not edit or rank what you say.
+        </li>
+        <li>Posting is public and stays attached to your account.</li>
+        <li>You can revise it later; earlier versions stay on the record.</li>
+      </ul>
+    </>
+  );
   return (
     <Modal
       onClose={onClose}
@@ -676,11 +690,20 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
       minHeight="520px"
       mainMinWidth="520px"
       roomyBars
+      title={
+        <p className="font-body font-medium text-lg text-ink">
+          Share Your Perspective
+        </p>
+      }
+      sidebar={
+        <div className="min-h-full bg-sunken p-[20px] pt-[24px]">{guidance}</div>
+      }
       footer={
-        // The code of conduct link on the left, the post button on the right.
-        // The button matches the position buttons in size at every width. On
-        // phones the link gets a taller tap area for a thumb, with the extra
-        // height pulled back out of the footer's padding.
+        // The code of conduct link on the left, lined up with the text box's
+        // left edge; the post button on the right, matching the position
+        // buttons in size at every width. On phones the link gets a taller tap
+        // area for a thumb, with the extra height pulled back out of the
+        // footer's padding.
         <div className="flex items-center justify-between gap-[16px]">
           <button className="max-sm:-my-[8px] max-sm:py-[8px] font-body text-2xs font-semibold leading-[1.5] text-ink-muted hover:text-brand underline underline-offset-2 whitespace-nowrap cursor-pointer">
             View our Code of Conduct
@@ -690,75 +713,65 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
       }
-      title={
-        <p className="font-display font-normal text-xl text-ink">
-          What do you think about Q{QUESTION.number}?
-        </p>
-      }
     >
-      {/* The guidance leads at every width, then the form. The form takes
-          whatever height is left, and the text box grows to fill it down to
+      {/* The question, the position buttons, and the text box with the
+          posting guidance. The text box grows to fill the height left down to
           the footer. */}
       <div className="h-full flex flex-col gap-[16px] pb-[12px]">
-        <div className="-mt-[8px] pb-[8px]">
-          <p className="font-body font-semibold text-2xs text-ink-muted mb-[8px]">
-            Before you post
-          </p>
-          <ul className="list-disc list-outside pl-[16px] space-y-[8px] font-body text-xs text-ink-muted leading-[1.5] marker:text-ink-faint">
-            <li>
-              Write in your own words. MAPLE does not edit or rank what you
-              say.
-            </li>
-            <li>Posting is public and stays attached to your account.</li>
-            <li>
-              You can revise it later; earlier versions stay on the record.
-            </li>
-          </ul>
-        </div>
         <div className="flex-1 flex flex-col bg-ground rounded-control py-[8px]">
-          {/* Below 440px the three buttons share the row equally, with larger
-              text and emoji to fill the extra width. */}
-          <div className="flex gap-[8px] max-[440px]:gap-[6px] flex-wrap mb-[20px]">
-            {choices.map(({ id, label, glyph }) => {
-              // The same emoji the feed's position filter uses, so the choice
-              // here and the filter there read as one set.
-              const g = STANCE_GLYPHS.find((x) => x.id === glyph)!;
-              const c = STANCE_CHIP[id];
-              const on = stance === id;
-              return (
-                <button
-                  key={id}
-                  onClick={() => setStance(id)}
-                  aria-pressed={on}
-                  // Selected, it wears the same colours the chip on a posted
-                  // testimony will, so the choice previews its own result.
-                  className={`inline-flex items-center gap-[8px] max-[440px]:gap-[6px] rounded-control border px-[14px] py-[8px] max-[440px]:flex-1 max-[440px]:justify-center max-[440px]:px-[8px] max-[440px]:py-[10px] font-body font-semibold text-sm max-[440px]:text-[15px] whitespace-nowrap cursor-pointer transition-colors ${
-                    on
-                      ? `${c.bg} border-line-strong ${c.tx}`
-                      : "bg-surface border-line-strong text-ink-muted hover:bg-wash"
-                  }`}
-                >
-                  <span
-                    aria-hidden
-                    className={`text-[18px] max-[440px]:text-[20px] leading-none drop-shadow-[0_1px_1.5px_rgba(20,20,19,0.3)] ${
-                      g.chipOffset ?? ""
-                    }`}
-                  >
-                    {g.glyph}
-                  </span>
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-
           {/* Stretches to fill the rest of the form, and the text box with it. */}
-          <div className="flex-1 flex flex-col">
-            <textarea
-              rows={6}
-              placeholder="What do you want lawmakers and other voters to know about this question?"
-              className="flex-1 w-full resize-none bg-surface border border-line-strong rounded-control p-[12px] font-body text-lg text-ink leading-[1.55] placeholder:text-ink-muted focus:outline-none focus:border-brand"
-            />
+          <div className="flex-1 flex flex-col gap-[16px]">
+            {/* On phones the guidance leads, above the question; from sm up it
+                moves to the modal's sidebar instead. */}
+            <div className="sm:hidden mb-[8px] bg-sunken border border-line-ghost rounded-control p-[16px]">
+              {guidance}
+            </div>
+            <h2 className="mb-[8px] font-display font-medium text-2xl leading-[1.25] text-ink">
+              What do you think about Q{QUESTION.number}?
+            </h2>
+            {/* The position buttons ride directly on top of the text box. */}
+            <div className="flex-1 min-w-0 flex flex-col">
+              {/* Below 440px the three buttons share the row equally, with larger
+                  text and emoji to fill the extra width. */}
+              <div className="flex gap-[8px] max-[440px]:gap-[6px] flex-wrap mb-[12px]">
+                {choices.map(({ id, label, glyph }) => {
+                  // The same emoji the feed's position filter uses, so the choice
+                  // here and the filter there read as one set.
+                  const g = STANCE_GLYPHS.find((x) => x.id === glyph)!;
+                  const c = STANCE_CHIP[id];
+                  const on = stance === id;
+                  return (
+                    <button
+                      key={id}
+                      onClick={() => setStance(id)}
+                      aria-pressed={on}
+                      // Selected, it wears the same colours the chip on a posted
+                      // testimony will, so the choice previews its own result.
+                      className={`inline-flex items-center gap-[8px] max-[440px]:gap-[6px] rounded-control border px-[14px] py-[8px] max-[440px]:flex-1 max-[440px]:justify-center max-[440px]:px-[8px] max-[440px]:py-[10px] font-body font-semibold text-sm max-[440px]:text-[15px] whitespace-nowrap cursor-pointer transition-colors ${
+                        on
+                          ? `${c.bg} border-line-strong ${c.tx}`
+                          : "bg-surface border-line-strong text-ink-muted hover:bg-wash"
+                      }`}
+                    >
+                      <span
+                        aria-hidden
+                        className={`text-[18px] max-[440px]:text-[20px] leading-none drop-shadow-[0_1px_1.5px_rgba(20,20,19,0.3)] ${
+                          g.chipOffset ?? ""
+                        }`}
+                      >
+                        {g.glyph}
+                      </span>
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+              <textarea
+                rows={4}
+                placeholder="What do you want lawmakers and other voters to know about this question?"
+                className="flex-1 min-w-0 w-full resize-none bg-surface border border-line-strong rounded-control p-[12px] font-body text-lg text-ink leading-[1.55] placeholder:text-ink-muted focus:outline-none focus:border-brand"
+              />
+            </div>
           </div>
         </div>
       </div>
