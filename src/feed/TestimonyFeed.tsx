@@ -606,7 +606,7 @@ function TestimonyModal({
             );
           })()}
           <p className="font-body font-normal text-xl text-ink">
-            Ballot Question {QUESTION.number} - {QUESTION.title}
+            Q{QUESTION.number} - {QUESTION.title}
           </p>
         </div>
       }
@@ -676,6 +676,8 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
       minHeight="520px"
       mainMinWidth="520px"
       asideFirst
+      ruledBars
+      tone="surface"
       footer={
         <div className="flex items-center justify-end gap-[12px]">
           <button
@@ -691,43 +693,45 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
       }
       title={
         <p className="font-body font-normal text-xl text-ink">
-          Add your perspective on Ballot Question {QUESTION.number}
+          Add your perspective on Q{QUESTION.number}
         </p>
       }
       aside={
-        <div className="flex flex-col gap-[16px]">
-          <div className="bg-surface rounded-control p-[20px]">
-            <p className="font-body font-semibold text-2xs text-ink-muted mb-[8px]">
-              Before you post
+        <div className="bg-ground border border-line-ghost rounded-control p-[20px]">
+          <p className="font-body font-semibold text-2xs text-ink-muted mb-[8px]">
+            Before you post
+          </p>
+          <ul className="list-disc list-outside pl-[16px] space-y-[8px] font-body text-xs text-ink-muted leading-[1.5] marker:text-ink-faint">
+            <li>
+              Write in your own words. MAPLE does not edit or rank what you
+              say.
+            </li>
+            <li>Posting is public and stays attached to your account.</li>
+            <li>
+              You can revise it later; earlier versions stay on the record.
+            </li>
+          </ul>
+          <div className="mt-[16px] flex flex-col gap-[8px] font-body text-xs text-ink-muted leading-[1.5]">
+            <p>
+              <a
+                href="https://www.mapletestimony.org/learn/writing-effective-testimony"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-2xs text-ink-muted hover:text-brand underline underline-offset-2"
+              >
+                Testimony Writing Tips
+              </a>
             </p>
-            <ul className="list-disc list-outside pl-[16px] space-y-[8px] font-body text-xs text-ink-muted leading-[1.5] marker:text-ink-faint">
-              <li>
-                Write in your own words. MAPLE does not edit or rank what you
-                say.
-              </li>
-              <li>Posting is public and stays attached to your account.</li>
-              <li>
-                You can revise it later; earlier versions stay on the record.
-              </li>
-            </ul>
+            <p>
+              <button className="font-body text-2xs font-semibold leading-[1.5] text-ink-muted hover:text-brand underline underline-offset-2 cursor-pointer">
+                Code of Conduct
+              </button>
+            </p>
           </div>
-          {/* Both sit on the panel's grey rather than in cards: they point off
-              this form rather than being part of it. */}
-          <a
-            href="https://www.mapletestimony.org/learn/writing-effective-testimony"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-body text-xs text-ink-muted hover:text-brand px-[16px]"
-          >
-            Testimony writing tips
-          </a>
-          <button className="text-left font-body text-xs text-ink-muted hover:text-brand cursor-pointer px-[16px]">
-            View our code of conduct
-          </button>
         </div>
       }
     >
-      <div className="bg-surface rounded-control p-[20px]">
+      <div className="bg-ground rounded-control p-[20px]">
         <p className="font-body font-semibold text-2xs text-ink-muted mb-[8px]">
           Your position
         </p>
@@ -759,7 +763,7 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
         <textarea
           rows={10}
           placeholder="What do you want lawmakers and other voters to know about this question?"
-          className="w-full resize-none border border-line-strong rounded-control p-[12px] font-body text-base text-ink leading-[1.55] placeholder:text-ink-muted focus:outline-none focus:border-brand"
+          className="w-full resize-none bg-surface border border-line-strong rounded-control p-[12px] font-body text-base text-ink leading-[1.55] placeholder:text-ink-muted focus:outline-none focus:border-brand"
         />
       </div>
     </Modal>
@@ -1279,7 +1283,11 @@ export function TestimonyFeed({
             {/* One row above the cards: the two pickers on the left, Following
                 pinned right. Following is an overlay on whatever they set
                 rather than a third way to narrow, so it sits apart. */}
-            <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[8px] mb-[12px]">
+            <div
+              className={`flex flex-wrap items-center gap-x-[12px] gap-y-[8px] ${
+                positionRow === "inline" ? "mb-[12px]" : "mb-[20px]"
+              }`}
+            >
               <AccountTypePicker
                 value={typeFilter}
                 onChange={setTypeFilter}

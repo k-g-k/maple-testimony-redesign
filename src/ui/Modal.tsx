@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 // The overlay panel every modal on the page is built from. Grey ground with
-// white cards on it, the same relationship the page itself uses, so a modal
-// reads as a small page rather than a floating card.
+// white cards on it by default, the same relationship the page itself uses,
+// so a modal reads as a small page rather than a floating card. `tone`
+// "surface" swaps that: a white panel, for grey cards set on it.
 //
 // Slots, all optional except `children`:
 //
@@ -24,8 +26,8 @@ import { X } from "lucide-react";
 // `asidePinned` (default) makes the aside sticky under the header, so actions
 // stay put while a long body scrolls beside them.
 //
-// Below sm the panel becomes a full-screen sheet and the columns stack, body
-// first and aside after it, whatever `asideFirst` says. `mainMinWidth` only
+// Below sm the panel becomes a full-screen sheet and the columns stack: body
+// then aside, or aside then body with `asideFirst`. `mainMinWidth` only
 // applies from sm up, since a phone has no room to honour it.
 const PAD = 20;
 
@@ -40,6 +42,8 @@ export function Modal({
   maxWidth = "760px",
   minHeight,
   mainMinWidth,
+  ruledBars = false,
+  tone = "ground",
   children,
 }: {
   onClose: () => void;
@@ -48,8 +52,9 @@ export function Modal({
   aside?: ReactNode;
   asidePinned?: boolean;
   /**
-   * Put the aside on the left. It stays second in the DOM either way, so the
-   * body is still what a screen reader and the tab order reach first.
+   * Put the aside on the left, or above the body where the columns stack. It
+   * stays second in the DOM either way, so the body is still what a screen
+   * reader and the tab order reach first.
    */
   asideFirst?: boolean;
   footer?: ReactNode;
@@ -59,8 +64,14 @@ export function Modal({
   /** Floor for the body column. Widen `maxWidth` to match, or the aside gets
    *  squeezed to make room for it. */
   mainMinWidth?: string;
+  /** Header and footer ruled off from the body with a hairline, with their
+      content centred in them and space above the body. */
+  ruledBars?: boolean;
+  /** The panel colour, which the sticky header and footer share. */
+  tone?: "ground" | "surface";
   children: ReactNode;
 }) {
+  const bg = tone === "surface" ? "bg-surface" : "bg-ground";
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -87,22 +98,30 @@ export function Modal({
     return () => observer.disconnect();
   }, []);
 
-  return (
+  // Rendered into <body> so no ancestor's stacking context can hold it
+  // beneath the page: it sits above the nav, the sticky filter bar and the
+  // floating add button.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 sm:p-[32px]"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 sm:p-[32px]"
     >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth, minHeight }}
-        className="relative flex w-full h-full sm:h-auto max-h-full flex-col overflow-y-auto bg-ground sm:rounded-panel shadow-[0_20px_60px_rgba(0,0,0,0.28)]"
+        className={`relative flex w-full h-full sm:h-auto max-h-full flex-col overflow-y-auto ${bg} sm:rounded-panel shadow-[0_20px_60px_rgba(0,0,0,0.28)]`}
       >
         <div
           ref={headerRef}
-          style={{ padding: `${PAD}px ${PAD}px 12px` }}
-          className="sticky top-0 z-20 flex items-center gap-[12px] bg-ground sm:rounded-t-panel"
+          // Ruled off, the header and footer are their own strips, so their
+          // content sits centred in them; otherwise the inner edge is tighter,
+          // closing up to the body.
+          style={{ padding: `${PAD}px ${PAD}px ${ruledBars ? PAD : 12}px` }}
+          className={`sticky top-0 z-20 flex items-center gap-[12px] ${
+            ruledBars ? "border-b border-line-ghost" : ""
+          } ${bg} sm:rounded-t-panel`}
         >
           <div className="flex-1 min-w-0">{title}</div>
           <div className="shrink-0 flex items-center gap-[18px]">
@@ -118,9 +137,15 @@ export function Modal({
         </div>
 
         <div
-          style={{ padding: `0 ${PAD}px ${footer ? 0 : PAD}px` }}
-          className={`flex flex-1 flex-col sm:flex-row items-stretch gap-[16px] ${
-            asideFirst ? "sm:flex-row-reverse" : ""
+          // Ruled off, the body needs its own space below the header rather
+          // than starting flush against its rule.
+          style={{
+            padding: `${ruledBars ? PAD : 0}px ${PAD}px ${footer ? 0 : PAD}px`,
+          }}
+          className={`flex flex-1 items-stretch gap-[16px] ${
+            asideFirst
+              ? "flex-col-reverse sm:flex-row-reverse"
+              : "flex-col sm:flex-row"
           }`}
         >
           <div
@@ -149,13 +174,16 @@ export function Modal({
 
         {footer && (
           <div
-            style={{ padding: `12px ${PAD}px ${PAD}px` }}
-            className="sticky bottom-0 z-20 mt-auto bg-ground sm:rounded-b-panel"
+            style={{ padding: `${ruledBars ? PAD : 12}px ${PAD}px ${PAD}px` }}
+            className={`sticky bottom-0 z-20 mt-auto ${
+              ruledBars ? "border-t border-line-ghost" : ""
+            } ${bg} sm:rounded-b-panel`}
           >
             {footer}
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
