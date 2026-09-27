@@ -4,8 +4,8 @@ import App from "./App";
 import "./styles/index.css";
 
 // Layout variants of the same page, for comparing the filter row side by side.
-// The main page uses /test2's filter row below sm and the single inline row
-// from sm up. /test puts the position picker on its own line; /test2 does the
+// The main page puts the position picker beside the account picker from sm
+// up, and on its own line beneath it below sm. /test puts the position picker on its own line; /test2 does the
 // same and keeps its words from 640px up.
 const DEFAULT = { positionRow: "responsive" } as const;
 const VARIANTS = {

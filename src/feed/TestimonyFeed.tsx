@@ -799,18 +799,37 @@ export function PositionPicker({
   locked = false,
   labeled = false,
   largeOnPhones = false,
+  fillRow = false,
+  largeListOnPhones = false,
+  alignEnd = false,
+  spreadOnPhones = false,
 }: {
   value: StanceFilter;
   onChange: (v: StanceFilter) => void;
   /** State the position without offering to change or clear it. */
   locked?: boolean;
-  /** Keep the words beside the glyphs from 640px up, instead of only
-      from 730px up, and set them a size larger. */
+  /** Set the words beside the glyphs a size larger. */
   labeled?: boolean;
   /** Larger glyphs, words and tap targets below sm, with more space between
       the options. */
   largeOnPhones?: boolean;
+  /** Below sm, stretch the chosen chip to fill the rest of its row, with the
+      glyph and word centred, as the labeled chip does at full width. */
+  fillRow?: boolean;
+  /** Below sm, set the chosen chip's dropdown at the larger size the labeled
+      picker uses. */
+  largeListOnPhones?: boolean;
+  /** For a picker at the right end of its row: the last glyph sits flush
+      with the row's edge, its padding pulled back out, and the chosen chip's
+      dropdown opens from the chip's right edge. */
+  alignEnd?: boolean;
+  /** Below sm, spread the unchosen options across the full width, each
+      taking an equal share with its glyph centred, in an outlined pill. */
+  spreadOnPhones?: boolean;
 }) {
+  // Below sm the chosen chip goes wide when labeled (full width) or when it
+  // fills its row (up to whatever sits beside it).
+  const wideChip = labeled || fillRow;
   const rowH = largeOnPhones ? "h-[40px] sm:h-[34px]" : "h-[34px]";
   const glyphSize = largeOnPhones ? "text-[24px] sm:text-[20px]" : "text-[20px]";
   const wordSize = labeled
@@ -869,7 +888,9 @@ export function PositionPicker({
         aria-label="Filter by position"
         className={`flex ${rowH} items-center ${
           largeOnPhones ? "max-sm:gap-[12px]" : ""
-        } ${labeled ? "max-sm:w-full" : ""}`}
+        } ${labeled || spreadOnPhones ? "max-sm:w-full max-sm:flex-1" : ""} ${
+          alignEnd ? "-mr-[9px]" : ""
+        }`}
       >
         {STANCE_GLYPHS.map(({ id, tip, glyph, chipOffset }) => (
           <button
@@ -878,8 +899,12 @@ export function PositionPicker({
             aria-label={tip}
             className={`flex h-full items-center px-[9px] rounded-pill hover:bg-wash cursor-pointer transition-colors duration-150 ${
               labeled
-                ? "gap-[8px] max-sm:gap-0 max-sm:shadow-[0_0_4px_rgba(20,20,19,0.14)] max-sm:flex-1 max-sm:justify-center"
-                : "gap-0 min-[730px]:gap-[8px]"
+                ? "gap-[8px] max-sm:gap-0 max-sm:bg-sunken max-sm:shadow-[0_0_4px_rgba(20,20,19,0.14)] max-sm:flex-1 max-sm:justify-center"
+                : `gap-0 sm:gap-[8px] ${
+                    spreadOnPhones
+                      ? "max-sm:flex-1 max-sm:justify-center max-sm:border max-sm:border-line"
+                      : ""
+                  }`
             }`}
           >
             <span
@@ -891,7 +916,7 @@ export function PositionPicker({
               {glyph}
             </span>
             {/* Three labelled options are the widest thing on this row, so
-                below 730 the words go and the gap goes with them. The glyph
+                below sm the words go and the gap goes with them. The glyph
                 carries the meaning once you have seen it labelled, and the
                 button's aria-label keeps the name for a screen reader. The
                 selected chip keeps its word at every width: that one is
@@ -899,7 +924,7 @@ export function PositionPicker({
             <span
               aria-hidden
               className={`${
-                labeled ? "flex max-sm:hidden" : "hidden min-[730px]:flex"
+                labeled ? "flex max-sm:hidden" : "hidden sm:flex"
               } h-full items-center font-body font-semibold ${wordSize} leading-none text-ink whitespace-nowrap`}
             >
               {tip}
@@ -918,7 +943,12 @@ export function PositionPicker({
   // it replaces, with the glyph and word centred and the X alone at the far
   // right. The left padding matches the X, so the centring holds.
   return (
-    <div ref={ref} className={labeled ? "relative max-sm:w-full" : "relative"}>
+    <div
+      ref={ref}
+      className={`relative ${
+        labeled ? "max-sm:w-full" : fillRow ? "max-sm:flex-1 max-sm:min-w-0" : ""
+      }`}
+    >
       {/* The wash lives on the chip, so anywhere on it lights the whole shape.
           The X then stacks its own round wash on top of that, which is how it
           reads as a second target inside the first rather than as a hole in
@@ -926,8 +956,10 @@ export function PositionPicker({
       <div
         // The wash stays on while the menu is open, so the chip reads as the
         // thing the menu belongs to.
+        // Labeled, on phones the chip carries the same grey fill as the
+        // options it replaces.
         className={`relative flex items-center ${rowH} pr-[4px] rounded-pill border border-line hover:bg-wash ${
-          open ? "bg-wash" : ""
+          open ? "bg-wash" : labeled ? "max-sm:bg-sunken" : ""
         } transition-colors`}
       >
         <button
@@ -936,7 +968,7 @@ export function PositionPicker({
           aria-expanded={open}
           aria-label={`Position: ${current.tip}. Change`}
           className={`flex h-full items-center gap-[8px] pl-[8px] pr-[7px] rounded-l-pill cursor-pointer ${
-            labeled ? "max-sm:flex-1 max-sm:justify-center max-sm:pl-[30px]" : ""
+            wideChip ? "max-sm:flex-1 max-sm:justify-center max-sm:pl-[36px]" : ""
           }`}
         >
           {/* Each centred on the chip rather than sharing a baseline, so the
@@ -959,17 +991,23 @@ export function PositionPicker({
         <button
           onClick={() => onChange("all")}
           aria-label={`Clear the ${current.label} filter`}
-          className="relative z-10 flex items-center justify-center w-[26px] h-[26px] rounded-full text-ink-muted hover:text-ink hover:bg-wash-strong cursor-pointer transition-colors"
+          // Larger on phones, where it is a thumb's target.
+          className={`relative z-10 flex items-center justify-center size-[26px] ${
+            largeOnPhones ? "max-sm:size-[32px]" : ""
+          } rounded-full text-ink-muted hover:text-ink hover:bg-wash-strong cursor-pointer transition-colors`}
         >
-          <X aria-hidden className="w-[13px] h-[13px]" />
+          <X
+            aria-hidden
+            className={`size-[13px] ${largeOnPhones ? "max-sm:size-[17px]" : ""}`}
+          />
         </button>
       </div>
       {open && (
         <div
           role="listbox"
           className={`absolute left-0 top-[calc(100%+6px)] z-20 min-w-[190px] ${
-            labeled ? "max-sm:w-full" : ""
-          } bg-surface border border-line rounded-control shadow-popover py-[6px]`}
+            wideChip ? "max-sm:w-full" : ""
+          } ${alignEnd ? "left-auto right-0" : ""} bg-surface border border-line rounded-control shadow-popover py-[6px]`}
         >
           {/* Only the alternatives. The chip already names what is selected, so
               listing it again offers a choice that changes nothing. */}
@@ -985,7 +1023,11 @@ export function PositionPicker({
                 }}
                 // Labeled, the text matches the account-type list beside it.
                 className={`flex items-center gap-[10px] w-full text-left font-body ${
-                  labeled ? "text-lg sm:text-base" : "text-sm"
+                  labeled
+                    ? "text-lg sm:text-base"
+                    : largeListOnPhones
+                      ? "text-sm max-sm:text-lg"
+                      : "text-sm"
                 } text-ink px-[16px] py-[13px] cursor-pointer hover:bg-wash`}
               >
                 <span
@@ -1199,9 +1241,9 @@ export function TestimonyFeed({
       still register. */
   composeSignal?: number;
   /** Where the position picker sits: in the filter row, or on its own line
-      beneath it, either collapsing to glyphs below 730px ("below") or keeping
+      beneath it, either collapsing to glyphs below sm ("below") or keeping
       its words from 640px up ("below-labeled"). "responsive" is in the filter
-      row from sm up and "below-labeled" below it. */
+      row from sm up and on its own line beneath it below sm. */
   positionRow?: "inline" | "below" | "below-labeled" | "responsive";
   /** Passed to each card. See TestimonyEntry. */
   compactHeaderNarrow?: boolean;
@@ -1306,6 +1348,27 @@ export function TestimonyFeed({
             typeFilter,
         )
       : filtered;
+  const followingChip = (
+    <FilterChip
+      active={followingOnly}
+      ariaPressed={followingOnly}
+      onClick={() => setFollowingOnly((f) => !f)}
+      title={
+        followingOnly
+          ? "Clear the Following filter"
+          : "Only accounts you follow"
+      }
+      className={`inline-flex items-center gap-[5px] ${
+        positionRow !== "inline"
+          ? "max-sm:text-sm max-sm:px-[14px] max-sm:py-[5px]"
+          : ""
+      }`}
+    >
+      Following
+      {followingOnly && <X className="w-[12px] h-[12px]" />}
+    </FilterChip>
+  );
+
   // Paged, the feed fits a fixed height instead of scrolling inside one. The
   // page is clamped rather than reset, so narrowing the list while on a later
   // page lands on the last one that still has entries instead of an empty view.
@@ -1366,6 +1429,8 @@ export function TestimonyFeed({
                 <PositionPicker value={filter} onChange={setFilter} />
               )}
               {positionRow === "responsive" && (
+                // Beside the account picker from sm up; below sm it moves to its
+                // own row underneath.
                 <div className="max-sm:hidden">
                   <PositionPicker value={filter} onChange={setFilter} />
                 </div>
@@ -1374,31 +1439,23 @@ export function TestimonyFeed({
                   the row, with their own spacing. Held together rather than
                   laid out as two more items in the filter row, so a wider
                   account picker or a selected position moves the filters on the
-                  left without moving this pair or the gap inside it. */}
+                  left without moving this pair or the gap inside it. Left
+                  out entirely when it would be empty, so it takes no gap and
+                  does not compete for the row's right end. */}
+              {((includeFollowingFilter && positionRow !== "below") ||
+                !hideAddButton) && (
               <div className="ml-auto shrink-0 flex items-center gap-[8px]">
-                {includeFollowingFilter && (
+                {includeFollowingFilter &&
+                  positionRow !== "below" &&
                   // Following is an overlay on whatever else is set rather than
                   // another way to narrow by position or account, so it reads
-                  // better here than as the last item among the chips.
-                  <FilterChip
-                    active={followingOnly}
-                    ariaPressed={followingOnly}
-                    onClick={() => setFollowingOnly((f) => !f)}
-                    title={
-                      followingOnly
-                        ? "Clear the Following filter"
-                        : "Only accounts you follow"
-                    }
-                    className={`inline-flex items-center gap-[5px] ${
-                      positionRow !== "inline"
-                        ? "max-sm:text-sm max-sm:px-[14px] max-sm:py-[5px]"
-                        : ""
-                    }`}
-                  >
-                    Following
-                    {followingOnly && <X className="w-[12px] h-[12px]" />}
-                  </FilterChip>
-                )}
+                  // better here than as the last item among the chips. On the
+                  // main page below sm it moves down to the positions' row.
+                  (positionRow === "responsive" ? (
+                    <span className="max-sm:hidden">{followingChip}</span>
+                  ) : (
+                    followingChip
+                  ))}
                 {!hideAddButton && (
                   <button
                     onClick={() => setComposing(true)}
@@ -1414,22 +1471,30 @@ export function TestimonyFeed({
                   </button>
                 )}
               </div>
+              )}
             </div>
             {positionRow !== "inline" && (
               <div
-                className={`flex mb-[12px] ${
+                className={`flex items-center gap-[12px] mb-[12px] ${
                   positionRow === "responsive" ? "sm:hidden" : ""
                 }`}
               >
                 <PositionPicker
                   value={filter}
                   onChange={setFilter}
-                  labeled={
-                    positionRow === "below-labeled" ||
-                    positionRow === "responsive"
-                  }
+                  labeled={positionRow === "below-labeled"}
                   largeOnPhones
+                  fillRow={
+                    positionRow === "below" || positionRow === "responsive"
+                  }
+                  largeListOnPhones={positionRow === "responsive"}
+                  spreadOnPhones={positionRow === "responsive"}
                 />
+                {/* On /test, Following moves down to the positions' row, still
+                    pinned to the right. */}
+                {includeFollowingFilter && positionRow === "below" && (
+                  <div className="ml-auto shrink-0">{followingChip}</div>
+                )}
               </div>
             )}
             {/* Parked: the narrowing row that sat closest to the cards.

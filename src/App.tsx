@@ -84,7 +84,6 @@ export default function App({
               composeSignal={composeSignal}
               items={testimonyFor(() => true)}
               stickyTop="var(--pinned-h)"
-              includeFollowingFilter
               positionRow={positionRow}
               compactHeaderNarrow
               includeTypeFilter
