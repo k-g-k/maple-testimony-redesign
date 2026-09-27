@@ -41,7 +41,7 @@ export function Modal({
   maxWidth = "760px",
   minHeight,
   mainMinWidth,
-  ruledBars = false,
+  roomyBars = false,
   children,
 }: {
   onClose: () => void;
@@ -62,9 +62,9 @@ export function Modal({
   /** Floor for the body column. Widen `maxWidth` to match, or the aside gets
    *  squeezed to make room for it. */
   mainMinWidth?: string;
-  /** Header and footer ruled off from the body with a hairline, with their
-      content centred in them and space above the body. */
-  ruledBars?: boolean;
+  /** Header and footer with their content centred in them, and space between
+      the header and the body. */
+  roomyBars?: boolean;
   children: ReactNode;
 }) {
   useEffect(() => {
@@ -110,13 +110,10 @@ export function Modal({
       >
         <div
           ref={headerRef}
-          // Ruled off, the header and footer are their own strips, so their
-          // content sits centred in them; otherwise the inner edge is tighter,
-          // closing up to the body.
-          style={{ padding: `${PAD}px ${PAD}px ${ruledBars ? PAD : 12}px` }}
-          className={`sticky top-0 z-20 flex items-center gap-[12px] ${
-            ruledBars ? "border-b border-line-ghost" : ""
-          } bg-ground sm:rounded-t-panel`}
+          // Roomy, the header and footer content sits centred in them;
+          // otherwise the inner edge is tighter, closing up to the body.
+          style={{ padding: `${PAD}px ${PAD}px ${roomyBars ? PAD : 12}px` }}
+          className="sticky top-0 z-20 flex items-center gap-[12px] bg-ground sm:rounded-t-panel"
         >
           <div className="flex-1 min-w-0">{title}</div>
           <div className="shrink-0 flex items-center gap-[18px]">
@@ -132,10 +129,10 @@ export function Modal({
         </div>
 
         <div
-          // Ruled off, the body needs its own space below the header rather
-          // than starting flush against its rule.
+          // Roomy, the body gets its own space below the header rather than
+          // starting flush against it.
           style={{
-            padding: `${ruledBars ? PAD : 0}px ${PAD}px ${footer ? 0 : PAD}px`,
+            padding: `${roomyBars ? PAD : 0}px ${PAD}px ${footer ? 0 : PAD}px`,
           }}
           className={`flex flex-1 items-stretch gap-[16px] ${
             asideFirst
@@ -169,10 +166,8 @@ export function Modal({
 
         {footer && (
           <div
-            style={{ padding: `${ruledBars ? PAD : 12}px ${PAD}px ${PAD}px` }}
-            className={`sticky bottom-0 z-20 mt-auto ${
-              ruledBars ? "border-t border-line-ghost" : ""
-            } bg-ground sm:rounded-b-panel`}
+            style={{ padding: `${roomyBars ? PAD : 12}px ${PAD}px ${PAD}px` }}
+            className="sticky bottom-0 z-20 mt-auto bg-ground sm:rounded-b-panel"
           >
             {footer}
           </div>

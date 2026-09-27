@@ -675,31 +675,27 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
       maxWidth="860px"
       minHeight="520px"
       mainMinWidth="520px"
-      ruledBars
+      roomyBars
       footer={
-        // The code of conduct link on the left, the post button on the right.
-        // On phones the link gets a taller tap area for a thumb, with the extra
-        // height pulled back out of the footer's padding.
-        <div className="flex flex-wrap items-center justify-between gap-x-[16px] gap-y-[12px]">
-          <div className="flex-1 flex flex-wrap items-center gap-x-[16px] max-sm:-my-[8px] whitespace-nowrap font-body text-2xs font-semibold leading-[1.5] text-ink-muted">
-            <button className="max-sm:py-[8px] font-body text-2xs font-semibold leading-[1.5] text-ink-muted hover:text-brand underline underline-offset-2 cursor-pointer">
-              View our Code of Conduct
-            </button>
-          </div>
-          <button className="ml-auto bg-brand text-ink-inverse font-body font-semibold text-sm px-[18px] py-[8px] rounded-control cursor-pointer hover:bg-brand-hover">
+        <div className="flex justify-end">
+          <button className="bg-brand text-ink-inverse font-body font-semibold text-sm px-[18px] py-[8px] rounded-control cursor-pointer hover:bg-brand-hover">
             Review and Post
           </button>
         </div>
       }
       title={
-        <p className="font-body font-normal text-xl text-ink">
+        <p className="font-display font-normal text-xl text-ink">
           Add your perspective on Q{QUESTION.number}
         </p>
       }
     >
-      {/* The guidance leads at every width, then the form. */}
-      <div className="flex flex-col gap-[16px] pb-[12px]">
-        <div className="bg-ground rounded-control py-[8px]">
+      {/* The guidance leads at every width, then the form. The form takes
+          whatever height is left, and the text box grows to fill it down to
+          the footer. */}
+      <div className="h-full flex flex-col gap-[16px] pb-[12px]">
+        {/* A full-width band of darker grey, running edge to edge and up to
+            the header. */}
+        <div className="-mx-[20px] -mt-[20px] px-[20px] py-[16px] bg-sunken">
           <p className="font-body font-semibold text-2xs text-ink-muted mb-[8px]">
             Before you post
           </p>
@@ -714,11 +710,13 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
             </li>
           </ul>
         </div>
-        <div className="bg-ground rounded-control py-[8px]">
+        <div className="flex-1 flex flex-col bg-ground rounded-control py-[8px]">
           <p className="font-body font-semibold text-2xs text-ink-muted mb-[8px]">
             Your position
           </p>
-          <div className="flex gap-[8px] flex-wrap mb-[20px]">
+          {/* Below 440px the three buttons share the row equally, with larger
+              text and emoji to fill the extra width. */}
+          <div className="flex gap-[8px] max-[440px]:gap-[6px] flex-wrap mb-[20px]">
             {choices.map(({ id, label, glyph }) => {
               // The same emoji the feed's position filter uses, so the choice
               // here and the filter there read as one set.
@@ -732,7 +730,7 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
                   aria-pressed={on}
                   // Selected, it wears the same colours the chip on a posted
                   // testimony will, so the choice previews its own result.
-                  className={`inline-flex items-center gap-[8px] rounded-control border px-[14px] py-[8px] font-body font-semibold text-sm cursor-pointer transition-colors ${
+                  className={`inline-flex items-center gap-[8px] max-[440px]:gap-[6px] rounded-control border px-[14px] py-[8px] max-[440px]:flex-1 max-[440px]:justify-center max-[440px]:px-[8px] max-[440px]:py-[10px] font-body font-semibold text-sm max-[440px]:text-[15px] whitespace-nowrap cursor-pointer transition-colors ${
                     on
                       ? `${c.bg} border-line-strong ${c.tx}`
                       : "bg-surface border-line-strong text-ink-muted hover:bg-wash"
@@ -740,7 +738,7 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
                 >
                   <span
                     aria-hidden
-                    className={`text-[18px] leading-none drop-shadow-[0_1px_1px_rgba(20,20,19,0.12)] ${
+                    className={`text-[18px] max-[440px]:text-[20px] leading-none drop-shadow-[0_1px_1.5px_rgba(20,20,19,0.3)] ${
                       g.chipOffset ?? ""
                     }`}
                   >
@@ -752,11 +750,20 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
             })}
           </div>
 
-          <textarea
-            rows={10}
-            placeholder="What do you want lawmakers and other voters to know about this question?"
-            className="w-full resize-none bg-surface border border-line-strong rounded-control p-[12px] font-body text-base text-ink leading-[1.55] placeholder:text-ink-muted focus:outline-none focus:border-brand"
-          />
+          {/* The text box and the code of conduct link under it stretch as one
+              unit to fill the rest of the form; within it, the text box takes
+              all the height the link does not need. */}
+          <div className="flex-1 flex flex-col">
+            <textarea
+              rows={6}
+              placeholder="What do you want lawmakers and other voters to know about this question?"
+              className="flex-1 w-full resize-none bg-surface border border-line-strong rounded-control p-[12px] font-body text-lg text-ink leading-[1.55] placeholder:text-ink-muted focus:outline-none focus:border-brand"
+            />
+            {/* Padded top and bottom for a thumb-sized tap area. */}
+            <button className="self-start mt-[4px] py-[8px] font-body text-2xs font-semibold leading-[1.5] text-ink-muted hover:text-brand underline underline-offset-2 cursor-pointer">
+              View our Code of Conduct
+            </button>
+          </div>
         </div>
       </div>
     </Modal>
