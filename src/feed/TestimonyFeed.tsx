@@ -923,7 +923,13 @@ export function PositionPicker({
           The X then stacks its own round wash on top of that, which is how it
           reads as a second target inside the first rather than as a hole in
           it. */}
-      <div className={`relative flex items-center ${rowH} pr-[4px] rounded-pill border border-line hover:bg-wash transition-colors`}>
+      <div
+        // The wash stays on while the menu is open, so the chip reads as the
+        // thing the menu belongs to.
+        className={`relative flex items-center ${rowH} pr-[4px] rounded-pill border border-line hover:bg-wash ${
+          open ? "bg-wash" : ""
+        } transition-colors`}
+      >
         <button
           onClick={() => setOpen((o) => !o)}
           aria-haspopup="listbox"
@@ -963,7 +969,7 @@ export function PositionPicker({
           role="listbox"
           className={`absolute left-0 top-[calc(100%+6px)] z-20 min-w-[190px] ${
             labeled ? "max-sm:w-full" : ""
-          } bg-surface border border-line rounded-control shadow-popover py-[4px]`}
+          } bg-surface border border-line rounded-control shadow-popover py-[6px]`}
         >
           {/* Only the alternatives. The chip already names what is selected, so
               listing it again offers a choice that changes nothing. */}
@@ -977,7 +983,10 @@ export function PositionPicker({
                   onChange(id);
                   setOpen(false);
                 }}
-                className="flex items-center gap-[10px] w-full text-left font-body text-sm text-ink px-[12px] py-[10px] cursor-pointer hover:bg-wash"
+                // Labeled, the text matches the account-type list beside it.
+                className={`flex items-center gap-[10px] w-full text-left font-body ${
+                  labeled ? "text-lg sm:text-base" : "text-sm"
+                } text-ink px-[16px] py-[13px] cursor-pointer hover:bg-wash`}
               >
                 <span
                   aria-hidden
@@ -1080,7 +1089,7 @@ export function AccountTypePicker({
           role="listbox"
           className={`absolute left-0 top-[calc(100%+6px)] z-20 ${
             larger ? "min-w-[240px]" : "min-w-[200px]"
-          } bg-surface border border-line rounded-control shadow-popover py-[4px]`}
+          } bg-surface border border-line rounded-control shadow-popover py-[6px]`}
         >
           {TYPE_FILTERS.map((t) => (
             <button
@@ -1091,7 +1100,7 @@ export function AccountTypePicker({
                 onChange(t.id);
                 setOpen(false);
               }}
-              className={`flex items-center w-full text-left font-body px-[12px] py-[10px] cursor-pointer hover:bg-wash ${
+              className={`flex items-center w-full text-left font-body px-[16px] py-[13px] cursor-pointer hover:bg-wash ${
                 larger ? "gap-[10px] text-lg sm:text-base" : "gap-[8px] text-sm"
               } ${t.id === value ? "font-semibold text-brand" : "text-ink"}`}
             >
