@@ -40,18 +40,18 @@ export default function App({
   // Dismissing the notice hides it for the rest of the visit; it comes back
   // on the next page load.
   const [showNotice, setShowNotice] = useState(true);
-  // The close button is a strip down the note's right side: the X sits at
-  // its top, pushed toward the edge, and the whole strip, including the space
-  // to the X's left, dismisses. The text stays in its own column beside it.
+  // The close button is a strip down the note's right side: the X sits
+  // centred in its height, pushed toward the edge, and the whole strip,
+  // including the space to the X's left, dismisses. The text stays in its own column beside it.
   const notice = (
     <div className="flex items-stretch">
       <div className="flex-1 min-w-0">{DISCLAIMER}</div>
       <button
         onClick={() => setShowNotice(false)}
         aria-label="Dismiss notice"
-        className="shrink-0 flex items-start -my-[8px] py-[8px] pl-[16px] pr-[8px] -mr-[12px] text-caution-ink hover:opacity-70 cursor-pointer"
+        className="shrink-0 flex items-center -my-[8px] py-[8px] pl-[16px] pr-[8px] -mr-[12px] text-caution-ink hover:opacity-70 cursor-pointer"
       >
-        <X className="size-[16px] mt-[2px]" />
+        <X className="size-[16px]" />
       </button>
     </div>
   );
