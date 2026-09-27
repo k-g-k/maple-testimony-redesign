@@ -972,7 +972,11 @@ export function PositionPicker({
           aria-expanded={open}
           aria-label={`Position: ${current.tip}. Change`}
           className={`flex h-full items-center gap-[8px] pl-[8px] pr-[7px] rounded-l-pill cursor-pointer ${
-            wideChip ? "max-sm:flex-1 max-sm:justify-center max-sm:pl-[36px]" : ""
+            wideChip
+              ? `max-sm:flex-1 max-sm:justify-center ${
+                  spreadOnPhones ? "max-sm:pl-[52px]" : "max-sm:pl-[50px]"
+                }`
+              : ""
           }`}
         >
           {/* Each centred on the chip rather than sharing a baseline, so the
@@ -995,15 +999,33 @@ export function PositionPicker({
         <button
           onClick={() => onChange("all")}
           aria-label={`Clear the ${current.label} filter`}
-          // Larger on phones, where it is a thumb's target.
-          className={`relative z-10 flex items-center justify-center size-[26px] ${
-            largeOnPhones ? "max-sm:size-[32px]" : ""
-          } rounded-full text-ink-muted hover:text-ink hover:bg-wash-strong cursor-pointer transition-colors`}
+          // On phones the button is the whole right end of the chip, full
+          // height and reaching 12px in from the round mark, so a tap anywhere
+          // there clears. What shows is unchanged: the round mark keeps its
+          // size and place, and lights up when anywhere in the button is
+          // hovered. The chip's right padding is folded into the button, and
+          // the wide chip's left padding matches the button's width, so the
+          // label stays centred.
+          className={`group/clear relative z-10 flex items-center justify-center cursor-pointer ${
+            largeOnPhones
+              ? "max-sm:self-stretch max-sm:pl-[12px] max-sm:pr-[4px] max-sm:-mr-[4px]"
+              : ""
+          }`}
         >
-          <X
-            aria-hidden
-            className={`size-[13px] ${largeOnPhones ? "max-sm:size-[17px]" : ""}`}
-          />
+          <span
+            className={`flex items-center justify-center size-[26px] ${
+              spreadOnPhones
+                ? "max-sm:size-[36px]"
+                : largeOnPhones
+                  ? "max-sm:size-[34px]"
+                  : ""
+            } rounded-full text-ink-muted group-hover/clear:text-ink group-hover/clear:bg-wash-strong transition-colors`}
+          >
+            <X
+              aria-hidden
+              className={`size-[13px] ${largeOnPhones ? "max-sm:size-[19px]" : ""}`}
+            />
+          </span>
         </button>
       </div>
       {open && (
