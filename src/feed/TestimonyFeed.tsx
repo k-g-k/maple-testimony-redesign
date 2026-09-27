@@ -869,7 +869,7 @@ export function PositionPicker({
         aria-label="Filter by position"
         className={`flex ${rowH} items-center ${
           largeOnPhones ? "max-sm:gap-[12px]" : ""
-        }`}
+        } ${labeled ? "max-sm:w-full" : ""}`}
       >
         {STANCE_GLYPHS.map(({ id, tip, glyph, chipOffset }) => (
           <button
@@ -878,7 +878,7 @@ export function PositionPicker({
             aria-label={tip}
             className={`flex h-full items-center px-[9px] rounded-pill hover:bg-wash cursor-pointer transition-colors duration-150 ${
               labeled
-                ? "gap-[8px] max-[391px]:gap-0"
+                ? "gap-[8px] max-[391px]:gap-0 max-sm:shadow-[0_0_4px_rgba(20,20,19,0.14)] max-sm:flex-1 max-sm:justify-center"
                 : "gap-0 min-[730px]:gap-[8px]"
             }`}
           >
@@ -914,8 +914,11 @@ export function PositionPicker({
   // body opens the other positions, because swapping is the likelier next move
   // than clearing; the X on the end clears, with its own round hover so the
   // two targets are legible before you commit to one.
+  // Labeled, below sm the chosen chip spans the full width like the options
+  // it replaces, with the glyph and word centred and the X alone at the far
+  // right. The left padding matches the X, so the centring holds.
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className={labeled ? "relative max-sm:w-full" : "relative"}>
       {/* The wash lives on the chip, so anywhere on it lights the whole shape.
           The X then stacks its own round wash on top of that, which is how it
           reads as a second target inside the first rather than as a hole in
@@ -926,7 +929,9 @@ export function PositionPicker({
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-label={`Position: ${current.tip}. Change`}
-          className="flex h-full items-center gap-[8px] pl-[8px] pr-[7px] rounded-l-pill cursor-pointer"
+          className={`flex h-full items-center gap-[8px] pl-[8px] pr-[7px] rounded-l-pill cursor-pointer ${
+            labeled ? "max-sm:flex-1 max-sm:justify-center max-sm:pl-[30px]" : ""
+          }`}
         >
           {/* Each centred on the chip rather than sharing a baseline, so the
               word lines up with the X on the other end instead of following
@@ -956,7 +961,9 @@ export function PositionPicker({
       {open && (
         <div
           role="listbox"
-          className="absolute left-0 top-[calc(100%+6px)] z-20 min-w-[190px] bg-surface border border-line rounded-control shadow-popover py-[4px]"
+          className={`absolute left-0 top-[calc(100%+6px)] z-20 min-w-[190px] ${
+            labeled ? "max-sm:w-full" : ""
+          } bg-surface border border-line rounded-control shadow-popover py-[4px]`}
         >
           {/* Only the alternatives. The chip already names what is selected, so
               listing it again offers a choice that changes nothing. */}
