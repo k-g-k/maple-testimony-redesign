@@ -804,7 +804,7 @@ export function PositionPicker({
   onChange: (v: StanceFilter) => void;
   /** State the position without offering to change or clear it. */
   locked?: boolean;
-  /** Keep the words beside the glyphs above 390px wide, instead of only
+  /** Keep the words beside the glyphs from 640px up, instead of only
       from 730px up, and set them a size larger. */
   labeled?: boolean;
   /** Larger glyphs, words and tap targets below sm, with more space between
@@ -878,7 +878,7 @@ export function PositionPicker({
             aria-label={tip}
             className={`flex h-full items-center px-[9px] rounded-pill hover:bg-wash cursor-pointer transition-colors duration-150 ${
               labeled
-                ? "gap-[8px] max-[391px]:gap-0 max-sm:shadow-[0_0_4px_rgba(20,20,19,0.14)] max-sm:flex-1 max-sm:justify-center"
+                ? "gap-[8px] max-sm:gap-0 max-sm:shadow-[0_0_4px_rgba(20,20,19,0.14)] max-sm:flex-1 max-sm:justify-center"
                 : "gap-0 min-[730px]:gap-[8px]"
             }`}
           >
@@ -899,7 +899,7 @@ export function PositionPicker({
             <span
               aria-hidden
               className={`${
-                labeled ? "flex max-[391px]:hidden" : "hidden min-[730px]:flex"
+                labeled ? "flex max-sm:hidden" : "hidden min-[730px]:flex"
               } h-full items-center font-body font-semibold ${wordSize} leading-none text-ink whitespace-nowrap`}
             >
               {tip}
@@ -1019,9 +1019,11 @@ export function AccountTypePicker({
   locked?: boolean;
   /** Larger label and tap target below sm. */
   largeOnPhones?: boolean;
-  /** A larger label on phones and larger text and icons in the dropdown list,
+  /** A larger label on phones and larger text and icons in the dropdown list.
+      "phones" limits the larger list to below sm as well, leaving it at its
+      usual size from sm up.
       to match a labeled PositionPicker beside it. */
-  larger?: boolean;
+  larger?: boolean | "phones";
 }) {
   const size = larger
     ? "h-[40px] sm:h-[28px] text-[18px] sm:text-lg"
@@ -1088,7 +1090,11 @@ export function AccountTypePicker({
         <div
           role="listbox"
           className={`absolute left-0 top-[calc(100%+6px)] z-20 ${
-            larger ? "min-w-[240px]" : "min-w-[200px]"
+            larger === true
+              ? "min-w-[240px]"
+              : larger === "phones"
+                ? "min-w-[200px] max-sm:min-w-[240px]"
+                : "min-w-[200px]"
           } bg-surface border border-line rounded-control shadow-popover py-[6px]`}
         >
           {TYPE_FILTERS.map((t) => (
@@ -1101,18 +1107,38 @@ export function AccountTypePicker({
                 setOpen(false);
               }}
               className={`flex items-center w-full text-left font-body px-[16px] py-[13px] cursor-pointer hover:bg-wash ${
-                larger ? "gap-[10px] text-lg sm:text-base" : "gap-[8px] text-sm"
+                larger === true
+                  ? "gap-[10px] text-lg sm:text-base"
+                  : larger === "phones"
+                    ? "gap-[8px] text-sm max-sm:gap-[10px] max-sm:text-lg"
+                    : "gap-[8px] text-sm"
               } ${t.id === value ? "font-semibold text-brand" : "text-ink"}`}
             >
               <span
                 className={`${
-                  larger ? "w-[18px]" : "w-[15px]"
+                  larger === true
+                    ? "w-[18px]"
+                    : larger === "phones"
+                      ? "w-[15px] max-sm:w-[18px]"
+                      : "w-[15px]"
                 } shrink-0 flex items-center justify-center`}
               >
                 {t.id === "all" ? (
                   <Users
-                    className={larger ? "w-[18px] h-[18px]" : "w-[15px] h-[15px]"}
+                    className={
+                      larger === true
+                        ? "size-[18px]"
+                        : larger === "phones"
+                          ? "size-[15px] max-sm:size-[18px]"
+                          : "size-[15px]"
+                    }
                   />
+                ) : larger === "phones" ? (
+                  // UserTypeIcon sizes its svg inline, so the phone size has
+                  // to win over that style.
+                  <span className="flex max-sm:[&_svg]:size-[18px]!">
+                    <UserTypeIcon type={t.id} size={15} />
+                  </span>
                 ) : (
                   <UserTypeIcon type={t.id} size={larger ? 18 : 15} />
                 )}
@@ -1174,8 +1200,9 @@ export function TestimonyFeed({
   composeSignal?: number;
   /** Where the position picker sits: in the filter row, or on its own line
       beneath it, either collapsing to glyphs below 730px ("below") or keeping
-      its words above 390px ("below-labeled"). */
-  positionRow?: "inline" | "below" | "below-labeled";
+      its words from 640px up ("below-labeled"). "responsive" is in the filter
+      row from sm up and "below-labeled" below it. */
+  positionRow?: "inline" | "below" | "below-labeled" | "responsive";
   /** Passed to each card. See TestimonyEntry. */
   compactHeaderNarrow?: boolean;
   /** Add a "Following" toggle that narrows any stance filter to accounts the
@@ -1315,7 +1342,11 @@ export function TestimonyFeed({
                 rather than a third way to narrow, so it sits apart. */}
             <div
               className={`flex flex-wrap items-center gap-x-[12px] gap-y-[8px] ${
-                positionRow === "inline" ? "mb-[12px]" : "mb-[20px]"
+                positionRow === "inline"
+                  ? "mb-[12px]"
+                  : positionRow === "responsive"
+                    ? "mb-[12px] max-sm:mb-[20px]"
+                    : "mb-[20px]"
               }`}
             >
               <AccountTypePicker
@@ -1323,10 +1354,21 @@ export function TestimonyFeed({
                 onChange={setTypeFilter}
                 locked={lockTypeFilter}
                 largeOnPhones={positionRow !== "inline"}
-                larger={positionRow === "below-labeled"}
+                larger={
+                  positionRow === "below-labeled"
+                    ? true
+                    : positionRow === "responsive"
+                      ? "phones"
+                      : false
+                }
               />
               {positionRow === "inline" && (
                 <PositionPicker value={filter} onChange={setFilter} />
+              )}
+              {positionRow === "responsive" && (
+                <div className="max-sm:hidden">
+                  <PositionPicker value={filter} onChange={setFilter} />
+                </div>
               )}
               {/* Following and the action are one group pinned to the end of
                   the row, with their own spacing. Held together rather than
@@ -1374,11 +1416,18 @@ export function TestimonyFeed({
               </div>
             </div>
             {positionRow !== "inline" && (
-              <div className="flex mb-[12px]">
+              <div
+                className={`flex mb-[12px] ${
+                  positionRow === "responsive" ? "sm:hidden" : ""
+                }`}
+              >
                 <PositionPicker
                   value={filter}
                   onChange={setFilter}
-                  labeled={positionRow === "below-labeled"}
+                  labeled={
+                    positionRow === "below-labeled" ||
+                    positionRow === "responsive"
+                  }
                   largeOnPhones
                 />
               </div>

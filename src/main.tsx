@@ -4,9 +4,10 @@ import App from "./App";
 import "./styles/index.css";
 
 // Layout variants of the same page, for comparing the filter row side by side.
-// /test puts the position picker on its own line; /test2 does the same and
-// keeps its words above 390px.
-const DEFAULT = { positionRow: "inline" } as const;
+// The main page uses /test2's filter row below sm and the single inline row
+// from sm up. /test puts the position picker on its own line; /test2 does the
+// same and keeps its words from 640px up.
+const DEFAULT = { positionRow: "responsive" } as const;
 const VARIANTS = {
   "/test": { positionRow: "below" },
   "/test2": { positionRow: "below-labeled" },

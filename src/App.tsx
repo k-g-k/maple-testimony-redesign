@@ -30,7 +30,7 @@ export default function App({
   positionRow = "inline",
 }: {
   /** Where the feed's position picker sits. See TestimonyFeed. */
-  positionRow?: "inline" | "below" | "below-labeled";
+  positionRow?: "inline" | "below" | "below-labeled" | "responsive";
 }) {
   const [stance, setStance] = useState<StanceFilter>("all");
   const [accountType, setAccountType] = useState<TypeFilter>("all");
