@@ -664,10 +664,10 @@ function TestimonyModal({
 // than buried under it. Nothing submits; this is the form, not the plumbing.
 function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
   const [stance, setStance] = useState<TestimonyStance>("endorse");
-  const choices: { id: TestimonyStance; label: string }[] = [
-    { id: "endorse", label: "I support it" },
-    { id: "oppose", label: "I oppose it" },
-    { id: "no-position", label: "No position" },
+  const choices: { id: TestimonyStance; label: string; glyph: Stance }[] = [
+    { id: "endorse", label: "Endorse", glyph: "endorsing" },
+    { id: "oppose", label: "Oppose", glyph: "opposing" },
+    { id: "no-position", label: "Neutral", glyph: "no-position" },
   ];
   return (
     <Modal
@@ -675,18 +675,18 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
       maxWidth="860px"
       minHeight="520px"
       mainMinWidth="520px"
-      asideFirst
       ruledBars
-      tone="surface"
       footer={
-        <div className="flex items-center justify-end gap-[12px]">
-          <button
-            onClick={onClose}
-            className="font-body font-semibold text-sm text-ink-muted hover:text-ink cursor-pointer px-[8px] py-[8px]"
-          >
-            Cancel
-          </button>
-          <button className="bg-brand text-ink-inverse font-body font-semibold text-sm px-[18px] py-[8px] rounded-control cursor-pointer hover:bg-brand-hover">
+        // The code of conduct link on the left, the post button on the right.
+        // On phones the link gets a taller tap area for a thumb, with the extra
+        // height pulled back out of the footer's padding.
+        <div className="flex flex-wrap items-center justify-between gap-x-[16px] gap-y-[12px]">
+          <div className="flex-1 flex flex-wrap items-center gap-x-[16px] max-sm:-my-[8px] whitespace-nowrap font-body text-2xs font-semibold leading-[1.5] text-ink-muted">
+            <button className="max-sm:py-[8px] font-body text-2xs font-semibold leading-[1.5] text-ink-muted hover:text-brand underline underline-offset-2 cursor-pointer">
+              View our Code of Conduct
+            </button>
+          </div>
+          <button className="ml-auto bg-brand text-ink-inverse font-body font-semibold text-sm px-[18px] py-[8px] rounded-control cursor-pointer hover:bg-brand-hover">
             Review and Post
           </button>
         </div>
@@ -696,8 +696,10 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
           Add your perspective on Q{QUESTION.number}
         </p>
       }
-      aside={
-        <div className="bg-ground border border-line-ghost rounded-control p-[20px]">
+    >
+      {/* The guidance leads at every width, then the form. */}
+      <div className="flex flex-col gap-[16px] pb-[12px]">
+        <div className="bg-ground rounded-control py-[8px]">
           <p className="font-body font-semibold text-2xs text-ink-muted mb-[8px]">
             Before you post
           </p>
@@ -711,60 +713,51 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
               You can revise it later; earlier versions stay on the record.
             </li>
           </ul>
-          <div className="mt-[16px] flex flex-col gap-[8px] font-body text-xs text-ink-muted leading-[1.5]">
-            <p>
-              <a
-                href="https://www.mapletestimony.org/learn/writing-effective-testimony"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-2xs text-ink-muted hover:text-brand underline underline-offset-2"
-              >
-                Testimony Writing Tips
-              </a>
-            </p>
-            <p>
-              <button className="font-body text-2xs font-semibold leading-[1.5] text-ink-muted hover:text-brand underline underline-offset-2 cursor-pointer">
-                Code of Conduct
-              </button>
-            </p>
+        </div>
+        <div className="bg-ground rounded-control py-[8px]">
+          <p className="font-body font-semibold text-2xs text-ink-muted mb-[8px]">
+            Your position
+          </p>
+          <div className="flex gap-[8px] flex-wrap mb-[20px]">
+            {choices.map(({ id, label, glyph }) => {
+              // The same emoji the feed's position filter uses, so the choice
+              // here and the filter there read as one set.
+              const g = STANCE_GLYPHS.find((x) => x.id === glyph)!;
+              const c = STANCE_CHIP[id];
+              const on = stance === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => setStance(id)}
+                  aria-pressed={on}
+                  // Selected, it wears the same colours the chip on a posted
+                  // testimony will, so the choice previews its own result.
+                  className={`inline-flex items-center gap-[8px] rounded-control border px-[14px] py-[8px] font-body font-semibold text-sm cursor-pointer transition-colors ${
+                    on
+                      ? `${c.bg} border-line-strong ${c.tx}`
+                      : "bg-surface border-line-strong text-ink-muted hover:bg-wash"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className={`text-[18px] leading-none drop-shadow-[0_1px_1px_rgba(20,20,19,0.12)] ${
+                      g.chipOffset ?? ""
+                    }`}
+                  >
+                    {g.glyph}
+                  </span>
+                  {label}
+                </button>
+              );
+            })}
           </div>
-        </div>
-      }
-    >
-      <div className="bg-ground rounded-control p-[20px]">
-        <p className="font-body font-semibold text-2xs text-ink-muted mb-[8px]">
-          Your position
-        </p>
-        <div className="flex gap-[8px] flex-wrap mb-[20px]">
-          {choices.map(({ id, label }) => {
-            const { Icon } = STANCE_MARK[id];
-            const c = STANCE_CHIP[id];
-            const on = stance === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setStance(id)}
-                aria-pressed={on}
-                // Selected, it wears the same colours the chip on a posted
-                // testimony will, so the choice previews its own result.
-                className={`inline-flex items-center gap-[8px] rounded-control border px-[14px] py-[8px] font-body font-semibold text-sm cursor-pointer transition-colors ${
-                  on
-                    ? `${c.bg} border-line-strong ${c.tx}`
-                    : "bg-surface border-line-strong text-ink-muted hover:bg-wash"
-                }`}
-              >
-                <Icon className="h-[16px] w-auto" />
-                {label}
-              </button>
-            );
-          })}
-        </div>
 
-        <textarea
-          rows={10}
-          placeholder="What do you want lawmakers and other voters to know about this question?"
-          className="w-full resize-none bg-surface border border-line-strong rounded-control p-[12px] font-body text-base text-ink leading-[1.55] placeholder:text-ink-muted focus:outline-none focus:border-brand"
-        />
+          <textarea
+            rows={10}
+            placeholder="What do you want lawmakers and other voters to know about this question?"
+            className="w-full resize-none bg-surface border border-line-strong rounded-control p-[12px] font-body text-base text-ink leading-[1.55] placeholder:text-ink-muted focus:outline-none focus:border-brand"
+          />
+        </div>
       </div>
     </Modal>
   );

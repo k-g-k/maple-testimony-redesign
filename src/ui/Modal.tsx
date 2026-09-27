@@ -4,9 +4,8 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 // The overlay panel every modal on the page is built from. Grey ground with
-// white cards on it by default, the same relationship the page itself uses,
-// so a modal reads as a small page rather than a floating card. `tone`
-// "surface" swaps that: a white panel, for grey cards set on it.
+// white cards on it, the same relationship the page itself uses, so a modal
+// reads as a small page rather than a floating card.
 //
 // Slots, all optional except `children`:
 //
@@ -43,7 +42,6 @@ export function Modal({
   minHeight,
   mainMinWidth,
   ruledBars = false,
-  tone = "ground",
   children,
 }: {
   onClose: () => void;
@@ -67,11 +65,8 @@ export function Modal({
   /** Header and footer ruled off from the body with a hairline, with their
       content centred in them and space above the body. */
   ruledBars?: boolean;
-  /** The panel colour, which the sticky header and footer share. */
-  tone?: "ground" | "surface";
   children: ReactNode;
 }) {
-  const bg = tone === "surface" ? "bg-surface" : "bg-ground";
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -111,7 +106,7 @@ export function Modal({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth, minHeight }}
-        className={`relative flex w-full h-full sm:h-auto max-h-full flex-col overflow-y-auto ${bg} sm:rounded-panel shadow-[0_20px_60px_rgba(0,0,0,0.28)]`}
+        className={`relative flex w-full h-full sm:h-auto max-h-full flex-col overflow-y-auto bg-ground sm:rounded-panel shadow-[0_20px_60px_rgba(0,0,0,0.28)]`}
       >
         <div
           ref={headerRef}
@@ -121,7 +116,7 @@ export function Modal({
           style={{ padding: `${PAD}px ${PAD}px ${ruledBars ? PAD : 12}px` }}
           className={`sticky top-0 z-20 flex items-center gap-[12px] ${
             ruledBars ? "border-b border-line-ghost" : ""
-          } ${bg} sm:rounded-t-panel`}
+          } bg-ground sm:rounded-t-panel`}
         >
           <div className="flex-1 min-w-0">{title}</div>
           <div className="shrink-0 flex items-center gap-[18px]">
@@ -177,7 +172,7 @@ export function Modal({
             style={{ padding: `${ruledBars ? PAD : 12}px ${PAD}px ${PAD}px` }}
             className={`sticky bottom-0 z-20 mt-auto ${
               ruledBars ? "border-t border-line-ghost" : ""
-            } ${bg} sm:rounded-b-panel`}
+            } bg-ground sm:rounded-b-panel`}
           >
             {footer}
           </div>
