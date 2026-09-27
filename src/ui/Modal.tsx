@@ -31,11 +31,12 @@ import { X } from "lucide-react";
 // with `asideFirst`. `mainMinWidth` only applies from sm up, since a phone has
 // no room to honour it.
 const PAD = 20;
-// The phone rail: 24px of the sidebar's grey down the left edge, with the
-// content's usual 20px padding measured from the rail rather than the edge.
+// The phone rail, from 391px up to sm: 24px of the sidebar's grey down the
+// left edge, with the content's usual 20px padding measured from the rail
+// rather than the edge. At 390px and below there is no room to spare for it.
 // The padding overrides the inline padding, hence the important flag.
 const RAIL =
-  "max-sm:bg-[linear-gradient(to_right,var(--color-sunken)_24px,var(--color-ground)_24px)] max-sm:pl-[44px]!";
+  "min-[391px]:max-sm:bg-[linear-gradient(to_right,var(--color-sunken)_24px,var(--color-ground)_24px)] min-[391px]:max-sm:pl-[44px]!";
 
 export function Modal({
   onClose,

@@ -726,7 +726,7 @@ function AddPerspectiveModal({ onClose }: { onClose: () => void }) {
                 band stretched edge to edge in the header's grey, running over
                 the modal's rail so its text keeps the usual 20px inset. From sm
                 up it moves to the modal's sidebar instead. */}
-            <div className="sm:hidden -ml-[44px] -mr-[20px] -mt-[8px] mb-[8px] px-[20px] pt-[4px] pb-[16px] bg-sunken">
+            <div className="sm:hidden -ml-[20px] min-[391px]:-ml-[44px] -mr-[20px] -mt-[8px] mb-[8px] px-[20px] pt-[4px] pb-[16px] bg-sunken">
               {guidance}
             </div>
             <h2 className="mt-[8px] sm:mt-[16px] mb-[8px] font-display font-medium text-2xl leading-[1.25] text-ink">
